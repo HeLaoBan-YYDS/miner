@@ -1,5 +1,6 @@
 package com.ruoyi.common.core.domain.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -14,7 +15,7 @@ import com.ruoyi.common.xss.Xss;
 
 /**
  * 用户对象 sys_user
- * 
+ *
  * @author ruoyi
  */
 public class SysUser extends BaseEntity
@@ -91,6 +92,20 @@ public class SysUser extends BaseEntity
 
     /** 角色ID */
     private Long roleId;
+
+    /**
+     * 账户余额
+     */
+    private BigDecimal account;
+
+
+    public BigDecimal getAccount() {
+        return account;
+    }
+
+    public void setAccount(BigDecimal account) {
+        this.account = account;
+    }
 
     public SysUser()
     {

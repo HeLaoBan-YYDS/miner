@@ -4,9 +4,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import com.ruoyi.common.utils.spring.SpringUtils;
 
+import java.util.Locale;
+
 /**
  * 获取i18n资源文件
- * 
+ *
  * @author ruoyi
  */
 public class MessageUtils
@@ -22,5 +24,14 @@ public class MessageUtils
     {
         MessageSource messageSource = SpringUtils.getBean(MessageSource.class);
         return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+    }
+
+    /**
+     * 获取当前用户语言  为空默认设置中文
+     * @return
+     */
+    public static String  getCurrentLang(){
+        Locale locale = LocaleContextHolder.getLocale();
+        return  locale.getLanguage();
     }
 }

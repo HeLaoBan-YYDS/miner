@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysIncomeMapper">
+
+	<resultMap type="SysIncome" id="SysIncomeResult">
+		<result property="incomeId"    column="income_id"    />
+		<result property="orderId"    column="order_id"    />
+		<result property="userId"    column="user_id"    />
+		<result property="projectId"    column="project_id"    />
+		<result property="projectName"    column="project_name"    />
+		<result property="incomeAmount"    column="income_amount"    />
+		<result property="orderHashrate"    column="order_hashrate"    />
+		<result property="issueDate"    column="issue_date"    />
+		<result property="issueTime"    column="issue_time"    />
+		<result property="issueDatetime"    column="issue_datetime"    />
+		<result property="createBy"    column="create_by"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateBy"    column="update_by"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="remark"    column="remark"    />
+		<result property="delFlag"    column="del_flag"    />
+	</resultMap>
+
+	<sql id="selectSysIncomeVo">
+		select income_id, order_id, user_id, project_id, project_name, income_amount, order_hashrate, issue_date, issue_time, issue_datetime, create_by, create_time, update_by, update_time, remark, del_flag from sys_income
+	</sql>
+
+	<select id="selectSysIncomeList" parameterType="SysIncome" resultMap="SysIncomeResult">
+		<include refid="selectSysIncomeVo"/>
+		<where>
+			<if test="orderId != null "> and order_id = #{orderId}</if>
+			<if test="userId != null "> and user_id = #{userId}</if>
+			<if test="projectId != null "> and project_id = #{projectId}</if>
+			<if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+			<if test="incomeAmount != null "> and income_amount = #{incomeAmount}</if>
+			<if test="orderHashrate != null "> and order_hashrate = #{orderHashrate}</if>
+			<if test="params.beginIssueDatetime != null and params.beginIssueDatetime != '' and params.endIssueDatetime != null and params.endIssueDatetime != ''"> and issue_datetime between #{params.beginIssueDatetime} and #{params.endIssueDatetime}</if>
+		</where>
+	</select>
+
+	<select id="selectSysIncomeByIncomeId" parameterType="Long" resultMap="SysIncomeResult">
+		<include refid="selectSysIncomeVo"/>
+		where income_id = #{incomeId}
+	</select>
+
+	<insert id="insertSysIncome" parameterType="SysIncome" useGeneratedKeys="true" keyProperty="incomeId">
+		insert into sys_income
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="orderId != null">order_id,</if>
+			<if test="userId != null">user_id,</if>
+			<if test="projectId != null">project_id,</if>
+			<if test="projectName != null and projectName != ''">project_name,</if>
+			<if test="incomeAmount != null">income_amount,</if>
+			<if test="orderHashrate != null">order_hashrate,</if>
+			<if test="issueDate != null">issue_date,</if>
+			<if test="issueTime != null">issue_time,</if>
+			<if test="issueDatetime != null">issue_datetime,</if>
+			<if test="createBy != null">create_by,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="updateBy != null">update_by,</if>
+			<if test="updateTime != null">update_time,</if>
+			<if test="remark != null">remark,</if>
+			<if test="delFlag != null">del_flag,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="orderId != null">#{orderId},</if>
+			<if test="userId != null">#{userId},</if>
+			<if test="projectId != null">#{projectId},</if>
+			<if test="projectName != null and projectName != ''">#{projectName},</if>
+			<if test="incomeAmount != null">#{incomeAmount},</if>
+			<if test="orderHashrate != null">#{orderHashrate},</if>
+			<if test="issueDate != null">#{issueDate},</if>
+			<if test="issueTime != null">#{issueTime},</if>
+			<if test="issueDatetime != null">#{issueDatetime},</if>
+			<if test="createBy != null">#{createBy},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="updateBy != null">#{updateBy},</if>
+			<if test="updateTime != null">#{updateTime},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="delFlag != null">#{delFlag},</if>
+		</trim>
+	</insert>
+
+	<update id="updateSysIncome" parameterType="SysIncome">
+		update sys_income
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="orderId != null">order_id = #{orderId},</if>
+			<if test="userId != null">user_id = #{userId},</if>
+			<if test="projectId != null">project_id = #{projectId},</if>
+			<if test="projectName != null and projectName != ''">project_name = #{projectName},</if>
+			<if test="incomeAmount != null">income_amount = #{incomeAmount},</if>
+			<if test="orderHashrate != null">order_hashrate = #{orderHashrate},</if>
+			<if test="issueDate != null">issue_date = #{issueDate},</if>
+			<if test="issueTime != null">issue_time = #{issueTime},</if>
+			<if test="issueDatetime != null">issue_datetime = #{issueDatetime},</if>
+			<if test="createBy != null">create_by = #{createBy},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateBy != null">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="remark != null">remark = #{remark},</if>
+			<if test="delFlag != null">del_flag = #{delFlag},</if>
+		</trim>
+		where income_id = #{incomeId}
+	</update>
+
+	<delete id="deleteSysIncomeByIncomeId" parameterType="Long">
+		delete from sys_income where income_id = #{incomeId}
+	</delete>
+
+	<delete id="deleteSysIncomeByIncomeIds" parameterType="String">
+		delete from sys_income where income_id in
+		<foreach item="incomeId" collection="array" open="(" separator="," close=")">
+			#{incomeId}
+		</foreach>
+	</delete>
+</mapper>

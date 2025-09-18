@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BizAddressMapper">
+
+	<resultMap type="BizAddress" id="BizAddressResult">
+		<result property="id"    column="id"    />
+		<result property="address"    column="address"    />
+		<result property="userId"    column="user_id"    />
+		<result property="useFlag"    column="use_flag"    />
+		<result property="createBy"    column="create_by"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateBy"    column="update_by"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="coinType"    column="coin_type"    />
+	</resultMap>
+
+	<sql id="selectBizAddressVo">
+		select id, address, user_id, use_flag, create_by, create_time, update_by, update_time, coin_type from biz_address
+	</sql>
+
+	<select id="selectBizAddressList" parameterType="BizAddress" resultMap="BizAddressResult">
+		<include refid="selectBizAddressVo"/>
+		<where>
+			<if test="address != null  and address != ''"> and address = #{address}</if>
+			<if test="userId != null "> and user_id = #{userId}</if>
+			<if test="useFlag != null  and useFlag != ''"> and use_flag = #{useFlag}</if>
+			<if test="coinType != null  and coinType != ''"> and coin_type = #{coinType}</if>
+		</where>
+	</select>
+
+	<select id="selectBizAddressById" parameterType="Long" resultMap="BizAddressResult">
+		<include refid="selectBizAddressVo"/>
+		where id = #{id}
+	</select>
+
+	<insert id="insertBizAddress" parameterType="BizAddress" useGeneratedKeys="true" keyProperty="id">
+		insert into biz_address
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="address != null">address,</if>
+			<if test="userId != null">user_id,</if>
+			<if test="useFlag != null">use_flag,</if>
+			<if test="createBy != null">create_by,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="updateBy != null">update_by,</if>
+			<if test="updateTime != null">update_time,</if>
+			<if test="coinType != null">coin_type,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="address != null">#{address},</if>
+			<if test="userId != null">#{userId},</if>
+			<if test="useFlag != null">#{useFlag},</if>
+			<if test="createBy != null">#{createBy},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="updateBy != null">#{updateBy},</if>
+			<if test="updateTime != null">#{updateTime},</if>
+			<if test="coinType != null">#{coinType},</if>
+		</trim>
+	</insert>
+
+	<update id="updateBizAddress" parameterType="BizAddress">
+		update biz_address
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="address != null">address = #{address},</if>
+			<if test="userId != null">user_id = #{userId},</if>
+			<if test="useFlag != null">use_flag = #{useFlag},</if>
+			<if test="createBy != null">create_by = #{createBy},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateBy != null">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="coinType != null">coin_type = #{coinType},</if>
+		</trim>
+		where id = #{id}
+	</update>
+
+	<delete id="deleteBizAddressById" parameterType="Long">
+		delete from biz_address where id = #{id}
+	</delete>
+
+	<delete id="deleteBizAddressByIds" parameterType="String">
+		delete from biz_address where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>
