@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public enum LogStatus {
     PENDING("0", "待审核", "warning", "等待审核状态"),
     SUCCESS("1", "成功", "success", "操作成功完成"),
-    FAILED("2", "失败", "danger", "操作执行失败");
+    FAILED("2", "审核不通过", "danger", "审核不通过");
 
     /**
      * 数据库存储值

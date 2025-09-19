@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 public enum LogType {
     RECHARGE("recharge", "充值", "primary", "用户充值操作"),
     WITHDRAW("withdraw", "提现", "warning", "用户提现操作"),
-    PURCHASE("purchase", "购买产品", "success", "用户购买产品");
+    PURCHASE("purchase", "购买产品", "success", "用户购买产品"),
+    REFUND("refund", "退款", "info", "用户退款操作");
 
     /**
      * 数据库存储值
