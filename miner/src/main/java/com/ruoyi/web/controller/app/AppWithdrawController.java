@@ -38,7 +38,7 @@ public class AppWithdrawController {
     }
 
 
-    @PostMapping("/withdraw")
+    @PostMapping
     @PreAuthorize("@ss.hasRole('user')")
     @Log(title = "提现", businessType = BusinessType.UPDATE)
     @ApiOperation("提现")
