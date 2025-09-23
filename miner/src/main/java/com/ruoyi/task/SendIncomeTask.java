@@ -2,28 +2,26 @@ package com.ruoyi.task;
 
 
 import cn.hutool.core.date.DateUtil;
-import com.ruoyi.common.enums.CoinType;
-import com.ruoyi.common.enums.LogStatus;
-import com.ruoyi.common.enums.LogType;
-import com.ruoyi.common.enums.OrderStatusEnum;
+import com.ruoyi.common.enums.*;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizOrder;
-import com.ruoyi.system.mapper.BizLogMapper;
-import com.ruoyi.system.service.IBizLogService;
-import com.ruoyi.system.service.IBizOrderService;
-import com.ruoyi.system.service.ISysConfigService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.domain.BizProject;
+import com.ruoyi.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component("sendIncomeTask")
@@ -42,14 +40,18 @@ public class SendIncomeTask {
     @Autowired
     private ISysUserService userService;
 
+    @Autowired
+    private IBizProjectService projectService;
+
+    private Map<Long, BizProject> projectMap = new HashMap<>();
+
     @Transactional(rollbackFor = Exception.class)
     public void sendIncome() {
 
         Date now = new Date();
-        //查询今天已发的收益
+        //查询今天已发的收益日志
         Date startOfDay = DateUtil.beginOfDay(now);
         Date endOfDay = DateUtil.endOfDay(now);
-
         BizLog bizLogCondition = new BizLog();
         bizLogCondition.setLogType(LogType.INCOME.getCode());
         bizLogCondition.getParams().put("startTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, startOfDay));
@@ -57,6 +59,7 @@ public class SendIncomeTask {
         List<BizLog> issuedRewards = bizLogService.selectBizLogList(bizLogCondition);
         List<String> issuedRewardsOrderNo = issuedRewards.stream().map(BizLog::getOrderNo).collect(Collectors.toList());
 
+        //查询订单
         BizOrder orderCondition = new BizOrder();
         orderCondition.setDelFlag("0");
         List<BizOrder> bizOrders = orderService.selectBizOrderList(orderCondition);
@@ -64,6 +67,15 @@ public class SendIncomeTask {
             log.info("没有找到任何订单，跳过收益发放");
             return;
         }
+
+        //检查项目是否在售
+        BizProject project = new BizProject();
+        project.setStatus(ProjectStatus.SUCCESS.getCode());
+        List<BizProject> projectList = projectService.selectBizProjectList(project);
+        projectMap = projectList.stream().collect(Collectors.toMap(BizProject::getId, p -> p));
+
+
+        //过滤不满足条件的订单
         List<BizOrder> bizOrderList = bizOrders.stream()
                 .filter(order -> !OrderStatusEnum.ENDED.getCode().equals(order.getStatus()))
                 .collect(Collectors.toList());
@@ -94,22 +106,20 @@ public class SendIncomeTask {
                    continue;
                }
 
+                //扣除电费
+                if (deductElectricityFee(bizOrder)) continue;
 
+                //发放收益
                 String dailyYieldPerTStr = configService.selectConfigByKey("daily_per_t_yield");
                 //每日产出单位是比特
                 BigDecimal dailyYieldPerT = new BigDecimal(dailyYieldPerTStr);
                 BigDecimal income = dailyYieldPerT.multiply(bizOrder.getComputePower());
-
-                //发放收益
                 try {
                     userService.updateAccount(userId,income, CoinType.BTC);
                 } catch (Exception e) {
                     log.error("发放收益失败,订单号:{},用户ID:{},收益:{}", bizOrder.getOrderId(), userId, income);
                     continue;
                 }
-
-                //todo 扣电费
-
 
                 //记录日志
                 BizLog bizLog = new BizLog();
@@ -122,6 +132,35 @@ public class SendIncomeTask {
                 bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
                 bizLogService.insertBizLog(bizLog);
             }
+        }
+    }
+
+    private void deductElectricityFee(BizOrder bizOrder) {
+        BizProject bizProject = projectMap.get(bizOrder.getProjectId());
+
+        if (ObjectUtils.isEmpty(bizProject)){
+            String msg = String.format("项目不存在，订单号:%s,项目ID:%s", bizOrder.getOrderId(), bizOrder.getProjectId());
+            throw new ServiceException(msg);
+        }
+
+        BigDecimal powerConsumption = bizProject.getPowerConsumption();
+        BigDecimal computePower = bizProject.getComputePower();
+        BigDecimal orderComputePower = bizOrder.getComputePower();
+
+        //电费
+        BigDecimal electricityFee = powerConsumption
+                .divide(computePower, 8, RoundingMode.DOWN)
+                .multiply(orderComputePower)
+                .setScale(8, RoundingMode.DOWN).negate();
+
+        try {
+            userService.updateAccount(bizOrder.getUserId(),electricityFee, CoinType.USDT);
+        } catch (Exception e) {
+            String msg = String.format("扣除电费失败,订单号:%s,用户ID:%s,电费:%s", bizOrder.getOrderId(), bizOrder.getUserId(), electricityFee);
+            log.error("发放收益失败,电费不够订单号:{},用户ID:{}", bizOrder.getOrderId(), bizOrder.getUserId());
+            bizOrder.setStatus(OrderStatusEnum.POWER_ARREARS.getCode());
+            orderService.updateBizOrder(bizOrder);
+            throw new ServiceException(msg);
         }
     }
 
