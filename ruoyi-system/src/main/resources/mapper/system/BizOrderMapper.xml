@@ -51,6 +51,7 @@
 	<insert id="insertBizOrder" parameterType="BizOrder" useGeneratedKeys="true" keyProperty="orderId">
 		insert into biz_order
 		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="orderId != null">order_id,</if>
 			<if test="userId != null">user_id,</if>
 			<if test="projectId != null">project_id,</if>
 			<if test="projectName != null and projectName != ''">project_name,</if>
@@ -68,6 +69,7 @@
 			<if test="updateBy != null">update_by,</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
+		    <if test="orderId != null">#{orderId},</if>
 			<if test="userId != null">#{userId},</if>
 			<if test="projectId != null">#{projectId},</if>
 			<if test="projectName != null and projectName != ''">#{projectName},</if>

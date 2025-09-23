@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.enums.CoinType;
+import com.ruoyi.common.exception.ServiceException;
 
 /**
  * 用户 业务层
@@ -218,8 +220,10 @@ public interface ISysUserService
 
     /**
      * 修改用户余额
-     * @param userId 用户ID
-     * @param amount 变动金额
+     *
+     * @param userId   用户ID
+     * @param amount   变动金额
+     * @param coinType 币种
      */
-    void updateAccount(Long userId, BigDecimal amount);
+    void updateAccount(Long userId, BigDecimal amount, CoinType coinType) throws Exception;
 }

@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.BizOrder;
+import com.ruoyi.system.domain.dto.PlaceDTO;
 
 /**
  * 订单Service接口
@@ -58,4 +59,10 @@ public interface IBizOrderService
      * @return 结果
      */
     public int deleteBizOrderByOrderId(Long orderId);
+
+    /**
+     * 下单
+     * @param placeDTO  下单信息
+     */
+    void place(PlaceDTO placeDTO);
 }

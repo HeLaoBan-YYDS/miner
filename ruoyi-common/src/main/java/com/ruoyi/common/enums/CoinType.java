@@ -5,16 +5,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 币种类型枚举
  */
 @Getter
 public enum CoinType {
-    AIU("aiu", "AIU", "系统主币种", 8),
-    AIUX("aiux", "AIUX", "系统副币种", 8),
-    USDT("usdt", "USDT", "泰达币", 6);
+    USDT("usdt", "usdt_trc20", "泰达币", 6),
+    BTC("btc", "btc", "比特币", 6);
 
     /**
      * 数据库存储值
@@ -24,7 +22,7 @@ public enum CoinType {
     /**
      * 币种符号
      */
-    private final String symbol;
+    private final String coin;
 
     /**
      * 币种描述
@@ -36,9 +34,9 @@ public enum CoinType {
      */
     private final int defaultScale;
 
-    CoinType(String code, String symbol, String description, int defaultScale) {
+    CoinType(String code, String coin, String description, int defaultScale) {
         this.code = code;
-        this.symbol = symbol;
+        this.coin = coin;
         this.description = description;
         this.defaultScale = defaultScale;
     }
@@ -65,8 +63,8 @@ public enum CoinType {
     /**
      * 获取币种符号
      */
-    public static String getSymbol(String code) {
-        return getByCode(code).map(CoinType::getSymbol).orElse("");
+    public static String getCoin(String code) {
+        return getByCode(code).map(CoinType::getCoin).orElse("");
     }
 
     /**

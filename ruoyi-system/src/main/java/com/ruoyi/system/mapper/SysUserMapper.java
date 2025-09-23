@@ -155,4 +155,7 @@ public interface SysUserMapper
      * @return 结果
      */
     public int updateAccount(Long userId, BigDecimal amount);
+
+
+    int updateBTCAccount(Long userId, BigDecimal amount);
 }

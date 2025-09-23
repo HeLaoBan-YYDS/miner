@@ -1,6 +1,8 @@
 package com.ruoyi.system.domain;
 
 import java.math.BigDecimal;
+
+import com.ruoyi.common.enums.OrderStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -17,7 +19,7 @@ public class BizOrder extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 订单ID */
-    private Long orderId;
+    private String orderId;
 
     /** 用户ID */
     @Excel(name = "用户ID")
@@ -44,7 +46,7 @@ public class BizOrder extends BaseEntity
     private BigDecimal paymentAmount;
 
     /** 订单状态（paid:已支付, earning:收益中, power_arrears:电费欠费, ended:收益结束） */
-    @Excel(name = "订单状态", readConverterExp = "p=aid:已支付,,e=arning:收益中,,p=ower_arrears:电费欠费,,e=nded:收益结束")
+    @Excel(name = "订单状态", dictType = "")
     private String status;
 
     /** 等待期(天) */
@@ -58,12 +60,12 @@ public class BizOrder extends BaseEntity
     /** 删除标志（0存在 2删除） */
     private String delFlag;
 
-    public void setOrderId(Long orderId)
+    public void setOrderId(String orderId)
     {
         this.orderId = orderId;
     }
 
-    public Long getOrderId()
+    public String getOrderId()
     {
         return orderId;
     }
@@ -188,5 +190,10 @@ public class BizOrder extends BaseEntity
             .append("createBy", getCreateBy())
             .append("updateBy", getUpdateBy())
             .toString();
+    }
+
+
+    public boolean isEarning() {
+        return this.getStatus().equals(OrderStatusEnum.EARNING.getCode());
     }
 }

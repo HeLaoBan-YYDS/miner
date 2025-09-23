@@ -104,11 +104,11 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
                 return gson.toJson(params);
             }
 
-            BizWithdrawCallBackReq aiuTransferCallBackReq = JSON.toJavaObject(res, BizWithdrawCallBackReq.class);
+            BizWithdrawCallBackReq bizTransferCallBackReq = JSON.toJavaObject(res, BizWithdrawCallBackReq.class);
 
 
             BizLog bizLog = new BizLog();
-            bizLog.setOrderNo(aiuTransferCallBackReq.getData().getTrade_id());
+            bizLog.setOrderNo(bizTransferCallBackReq.getData().getTrade_id());
             List<BizLog> bizLogs = bizLogMapper.selectBizLogList(bizLog);
 
             if (CollectionUtils.isEmpty(bizLogs) || bizLogs.get(0) == null) {
@@ -125,7 +125,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
 
 
             //热钱包提现审核不通过
-            if ("10".equals(aiuTransferCallBackReq.getData().getStatus())) {
+            if ("10".equals(bizTransferCallBackReq.getData().getStatus())) {
                 handleNoPass(withdrawLog.getLogId());
                 return gson.toJson(params);
             }
@@ -154,7 +154,11 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
 
         //退款
         BigDecimal returnAmount = withdrawLog.getAmount().negate();
-        userService.updateAccount(withdrawLog.getUserId(), returnAmount);
+        try {
+            userService.updateAccount(withdrawLog.getUserId(), returnAmount, CoinType.getByCode(withdrawLog.getLogType()).orElse(null));
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
 
         //退款日志
         SysUser user = userService.selectUserById(withdrawLog.getUserId());
@@ -178,7 +182,11 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
             throw new ServiceException(MessageUtils.message("user.notfound"));
         }
         BigDecimal cashWithdrawalAmount = withdrawalAmount.negate();
-        userService.updateAccount(userId, cashWithdrawalAmount);
+        try {
+            userService.updateAccount(userId, cashWithdrawalAmount,CoinType.getByCode(withdrawDTO.getCoin()).orElse(null));
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
 
         //记录提现日志
         String tradeNo = OrderNoUtils.getOrderNo(LogType.WITHDRAW);
@@ -205,6 +213,10 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
     public void handlePass(Long id) {
         BizLog withdrawLog = bizLogMapper.selectBizLogByLogId(id);
 
+        if (ObjectUtils.isEmpty(withdrawLog)) {
+            throw new ServiceException("提现记录不存在");
+        }
+
         //审核通过 发送提现申请
         Map<String, Object> params = new HashMap<>();
         params.put("app_id", appId);
@@ -212,7 +224,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
         params.put("key_version", "admin");
         params.put("time", Long.toString(System.currentTimeMillis() / 1000));
         params.put("user_id", withdrawLog.getUserId());
-        params.put("coin", "usdt_trc20");
+        params.put("coin", CoinType.getCoin(withdrawLog.getCoinType()));
         params.put("address", withdrawLog.getAddress().trim());
         params.put("amount", withdrawLog.getAmount());
         params.put("trade_id", withdrawLog.getOrderNo());

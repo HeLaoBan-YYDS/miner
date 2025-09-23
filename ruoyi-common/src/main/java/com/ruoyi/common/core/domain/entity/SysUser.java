@@ -98,6 +98,18 @@ public class SysUser extends BaseEntity
      */
     private BigDecimal account;
 
+    /**
+     * btc账户余额
+     */
+    private BigDecimal btcAccount;
+
+    public BigDecimal getBtcAccount() {
+        return btcAccount;
+    }
+
+    public void setBtcAccount(BigDecimal btcAccount) {
+        this.btcAccount = btcAccount;
+    }
 
     public BigDecimal getAccount() {
         return account;

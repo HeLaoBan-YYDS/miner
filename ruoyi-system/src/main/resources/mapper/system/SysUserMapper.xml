@@ -25,6 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"     />
         <result property="remark"        column="remark"          />
 		<result property="account"       column="account"     />
+		<result property="btcAccount"    column="btc_account"     />
         <association property="dept"     javaType="SysDept"         resultMap="deptResult" />
         <collection  property="roles"    javaType="java.util.List"  resultMap="RoleResult" />
     </resultMap>
@@ -51,7 +52,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<sql id="selectUserVo">
         select u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.avatar, u.phonenumber, u.password, u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.pwd_update_date, u.create_by, u.create_time, u.remark,
         d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.status as dept_status,
-        r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status, u.account as role_status
+        r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status, u.account,u.btc_account as role_status
         from sys_user u
 		    left join sys_dept d on u.dept_id = d.dept_id
 		    left join sys_user_role ur on u.user_id = ur.user_id
@@ -216,6 +217,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<update id="updateAccount">
 	    update sys_user set account = account + #{amount} where user_id = #{userId} and account + #{account} >= 0
+	</update>
+
+	<update id="updateBTCAccount">
+		update sys_user set btc_account = btc_account + #{amount} where user_id = #{userId} and btc_account + #{account} >= 0
 	</update>
 
 	<delete id="deleteUserById" parameterType="Long">

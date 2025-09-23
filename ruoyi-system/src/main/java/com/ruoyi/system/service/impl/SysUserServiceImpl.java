@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Validator;
 
+import com.ruoyi.common.enums.CoinType;
 import com.ruoyi.common.utils.MessageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -572,14 +573,30 @@ public class SysUserServiceImpl implements ISysUserService
 
     /**
      * 更新账户信息
-     * @param userId 用户ID
-     * @param amount 变动金额
+     *
+     * @param userId   用户ID
+     * @param amount   变动金额
+     * @param coinType
      */
     @Override
-    public void updateAccount(Long userId, BigDecimal amount) {
-        int row = userMapper.updateAccount(userId, amount);
+    public void updateAccount(Long userId, BigDecimal amount, CoinType coinType) throws Exception {
+
+        int row = 0;
+        switch (coinType) {
+            case USDT:
+                row = userMapper.updateAccount(userId, amount);
+                break;
+            case BTC:
+                row = userMapper.updateBTCAccount(userId, amount);
+                break;
+            default:
+                // 处理未知币种
+                throw new Exception("coinType.unsupported");
+        }
+
+
         if (row < 1) {
-            throw new RuntimeException(MessageUtils.message("balance.notEnough"));
+            throw new Exception(MessageUtils.message("balance.notEnough"));
         }
     }
 }

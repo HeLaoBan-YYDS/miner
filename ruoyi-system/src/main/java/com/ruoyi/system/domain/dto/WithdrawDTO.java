@@ -6,12 +6,15 @@ import lombok.Setter;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
 @Getter
 @Setter
-public class WithdrawDTO {
+public class WithdrawDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @DecimalMin(value = "0.01", message = "{amount.min}")
     @NotBlank(message = "{amount.notblank}")

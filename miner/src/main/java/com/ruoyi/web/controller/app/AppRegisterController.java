@@ -55,6 +55,7 @@ public class AppRegisterController extends BaseController {
 
     @GetMapping("/app/sendSmsCode")
     @Log(title = "发送验证码", businessType = BusinessType.OTHER)
+    @Anonymous
     public AjaxResult sendSmsCode(String sign) {
 
         String email;
@@ -72,7 +73,7 @@ public class AppRegisterController extends BaseController {
         //生成验证码
         String validCode = InvitationCodeGenerator.generateInvitationCode();
 
-        if (Objects.equals(MailUtil.sendMail(email, validCode, "AIU英文注册"), "0")) {
+        if (Objects.equals(MailUtil.sendMail(email, validCode, "24Miner"), "0")) {
             String redisKey  = CacheConstants.CAPTCHA_CODE_KEY + email;
             redisCache.setCacheObject(redisKey, validCode, 5, TimeUnit.MINUTES);
             return AjaxResult.success();
