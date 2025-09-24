@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.enums.*;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizOrder;
 import com.ruoyi.system.domain.BizProject;
@@ -45,7 +46,13 @@ public class SendIncomeTask {
 
     private Map<Long, BizProject> projectMap = new HashMap<>();
 
-    @Transactional(rollbackFor = Exception.class)
+    //每日产出单位是比特
+   private String dailyYieldPerTStr = "0";
+
+   //单位电价
+   private BigDecimal powerFee = null;
+
+
     public void sendIncome() {
 
         Date now = new Date();
@@ -68,7 +75,7 @@ public class SendIncomeTask {
             return;
         }
 
-        //检查项目是否在售
+        //获取在售订单
         BizProject project = new BizProject();
         project.setStatus(ProjectStatus.SUCCESS.getCode());
         List<BizProject> projectList = projectService.selectBizProjectList(project);
@@ -80,11 +87,30 @@ public class SendIncomeTask {
                 .filter(order -> !OrderStatusEnum.ENDED.getCode().equals(order.getStatus()))
                 .collect(Collectors.toList());
 
+        //每日产出单位是比特
+        dailyYieldPerTStr = configService.selectConfigByKey("daily_per_t_yield");
+
+        powerFee = new BigDecimal(configService.selectConfigByKey("daily_power_fee"));
+
+        if (ObjectUtils.isEmpty(dailyYieldPerTStr) || new BigDecimal(dailyYieldPerTStr).compareTo(BigDecimal.ZERO) <= 0) {
+            String msg = "daily_per_t_yield 配置错误";
+            throw new ServiceException(msg);
+        }
+
+        if (ObjectUtils.isEmpty(powerFee) || powerFee.compareTo(BigDecimal.ZERO) <= 0) {
+            String msg = "daily_power_fee 配置错误";
+            throw new ServiceException(msg);
+        }
+
+        SendIncomeTask sendIncomeTask = SpringUtils.getBean(SendIncomeTask.class);
+        if (CollectionUtils.isEmpty(bizOrderList)) {
+            throw new ServiceException("sendIncomeTaskBean 获取失败");
+        }
+
         for (BizOrder bizOrder : bizOrderList) {
 
             Date createTime = bizOrder.getCreateTime();
             Long waitingPeriod = bizOrder.getWaitingPeriod();
-            Long userId = bizOrder.getUserId();
 
             //收益中的订单
             if (!bizOrder.isEarning()) {
@@ -106,36 +132,64 @@ public class SendIncomeTask {
                    continue;
                }
 
-                //扣除电费
-                if (deductElectricityFee(bizOrder)) continue;
-
-                //发放收益
-                String dailyYieldPerTStr = configService.selectConfigByKey("daily_per_t_yield");
-                //每日产出单位是比特
-                BigDecimal dailyYieldPerT = new BigDecimal(dailyYieldPerTStr);
-                BigDecimal income = dailyYieldPerT.multiply(bizOrder.getComputePower());
-                try {
-                    userService.updateAccount(userId,income, CoinType.BTC);
-                } catch (Exception e) {
-                    log.error("发放收益失败,订单号:{},用户ID:{},收益:{}", bizOrder.getOrderId(), userId, income);
-                    continue;
-                }
-
-                //记录日志
-                BizLog bizLog = new BizLog();
-                bizLog.setUserId(userId);
-                bizLog.setOrderNo(bizOrder.getOrderId());
-                bizLog.setLogType(LogType.INCOME.getCode());
-                bizLog.setCoinType(CoinType.BTC.getCode());
-                bizLog.setAmount(income);
-                bizLog.setCreateTime(new Date());
-                bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
-                bizLogService.insertBizLog(bizLog);
+                sendIncomeTask.handlerOrderIncome(bizOrder);
             }
         }
     }
 
-    private void deductElectricityFee(BizOrder bizOrder) {
+    @Transactional(rollbackFor = Exception.class)
+    public void handlerOrderIncome(BizOrder bizOrder) {
+        //扣除电费
+        BigDecimal orderComputePower = deductElectricityFee(bizOrder);
+
+        //扣电费日志
+        savePowerFeeLog(bizOrder, orderComputePower);
+
+        //发放收益
+        BigDecimal income = sendIncome(bizOrder);
+
+        //记录奖励日志
+        saveIncomeLog(bizOrder, income);
+    }
+
+    private void savePowerFeeLog(BizOrder bizOrder, BigDecimal orderComputePower) {
+        BizLog powerFeeLog = new BizLog();
+        powerFeeLog.setUserId(bizOrder.getUserId());
+        powerFeeLog.setOrderNo(bizOrder.getOrderId());
+        powerFeeLog.setLogType(LogType.POWER_FEE.getCode());
+        powerFeeLog.setCoinType(CoinType.USDT.getCode());
+        powerFeeLog.setAmount(orderComputePower);
+        powerFeeLog.setCreateTime(new Date());
+        powerFeeLog.setLogStatus(LogStatus.SUCCESS.getCode());
+        bizLogService.insertBizLog(powerFeeLog);
+    }
+
+    private void saveIncomeLog(BizOrder bizOrder, BigDecimal income) {
+        BizLog bizLog = new BizLog();
+        bizLog.setUserId(bizOrder.getUserId());
+        bizLog.setOrderNo(bizOrder.getOrderId());
+        bizLog.setLogType(LogType.INCOME.getCode());
+        bizLog.setCoinType(CoinType.BTC.getCode());
+        bizLog.setAmount(income);
+        bizLog.setCreateTime(new Date());
+        bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
+        bizLogService.insertBizLog(bizLog);
+    }
+
+    private BigDecimal sendIncome(BizOrder bizOrder) {
+        Long userId = bizOrder.getUserId();
+        BigDecimal dailyYieldPerT = new BigDecimal(dailyYieldPerTStr);
+        BigDecimal income = dailyYieldPerT.multiply(bizOrder.getComputePower());
+        try {
+            userService.updateAccount(userId,income, CoinType.BTC);
+        } catch (Exception e) {
+            String msg = String.format("发放收益失败,订单号:%s,用户ID:%s,收益:%s", bizOrder.getOrderId(), userId, income);
+            throw new ServiceException(msg);
+        }
+        return income;
+    }
+
+    private BigDecimal deductElectricityFee(BizOrder bizOrder) {
         BizProject bizProject = projectMap.get(bizOrder.getProjectId());
 
         if (ObjectUtils.isEmpty(bizProject)){
@@ -151,6 +205,7 @@ public class SendIncomeTask {
         BigDecimal electricityFee = powerConsumption
                 .divide(computePower, 8, RoundingMode.DOWN)
                 .multiply(orderComputePower)
+                .multiply(powerFee)
                 .setScale(8, RoundingMode.DOWN).negate();
 
         try {
@@ -162,6 +217,8 @@ public class SendIncomeTask {
             orderService.updateBizOrder(bizOrder);
             throw new ServiceException(msg);
         }
+
+        return orderComputePower;
     }
 
 

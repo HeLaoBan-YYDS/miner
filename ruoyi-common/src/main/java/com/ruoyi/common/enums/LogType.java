@@ -17,7 +17,9 @@ public enum LogType {
     WITHDRAW("withdraw", "提现", "warning", "用户提现操作"),
     PURCHASE("purchase", "购买产品", "success", "用户购买产品"),
     REFUND("refund", "退款", "info", "用户退款操作"),
+    POWER_FEE("powerFee", "扣电费", "success", "扣电费"),
     INCOME("income", "收益", "success", "收益");
+
 
     /**
      * 数据库存储值
