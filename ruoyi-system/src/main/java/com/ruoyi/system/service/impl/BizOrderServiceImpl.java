@@ -157,7 +157,7 @@ public class BizOrderServiceImpl implements IBizOrderService
         bizOrder.setProjectId(projectId);
         bizOrder.setComputePower(placeDTO.getComputePower());
         bizOrder.setUnitPrice(unitPrice);
-        bizOrder.setPaymentAmount(paymentAmount);
+        bizOrder.setPaymentAmount(paymentAmount.negate());
         bizOrder.setStatus(OrderStatusEnum.PAID.getCode());
         bizOrder.setUserId(placeDTO.getUserId());
         bizOrder.setProjectName(bizProject.getProjectName());

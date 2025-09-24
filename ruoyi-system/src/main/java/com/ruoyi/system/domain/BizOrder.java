@@ -194,6 +194,9 @@ public class BizOrder extends BaseEntity
 
 
     public boolean isEarning() {
+        if (this.getStatus() == null) {
+            return false;
+        }
         return this.getStatus().equals(OrderStatusEnum.EARNING.getCode());
     }
 }
