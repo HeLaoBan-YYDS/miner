@@ -135,7 +135,7 @@ public class BizOrderServiceImpl implements IBizOrderService
         }
         BigDecimal unitPrice = bizProject.getUnitPrice();
         BigDecimal paymentAmount = unitPrice.multiply(placeDTO.getComputePower()).setScale(4, RoundingMode.CEILING).negate();
-        if (paymentAmount.compareTo(placeDTO.getPaymentAmount()) != 0) {
+        if (paymentAmount.compareTo(placeDTO.getPaymentAmount().negate()) != 0) {
             throw new RuntimeException(MessageUtils.message("order.amount.error"));
         }
 

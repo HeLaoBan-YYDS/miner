@@ -2,8 +2,12 @@ package com.ruoyi.system.service.impl;
 
 import java.util.Collections;
 import java.util.List;
+
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.system.domain.vo.ProjectVo;
+import com.ruoyi.system.service.ISysDictDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.BizProjectMapper;
@@ -21,6 +25,9 @@ public class BizProjectServiceImpl implements IBizProjectService
 {
     @Autowired
     private BizProjectMapper bizProjectMapper;
+
+    @Autowired
+    private ISysDictDataService dictDataService;
 
     /**
      * 查询项目基本信息
@@ -56,7 +63,20 @@ public class BizProjectServiceImpl implements IBizProjectService
     public int insertBizProject(BizProject bizProject)
     {
         bizProject.setCreateTime(DateUtils.getNowDate());
-        return bizProjectMapper.insertBizProject(bizProject);
+
+        int row = bizProjectMapper.insertBizProject(bizProject);
+
+        if (row >0){
+            // 添加字典数据
+            SysDictData dictData = new SysDictData();
+            dictData.setDictType("project_dict");
+            dictData.setDictLabel(bizProject.getProjectName()); // 项目名称作为标签
+            dictData.setDictValue(bizProject.getId().toString()); // 项目ID作为值
+            dictDataService.insertDictData(dictData);
+        }
+
+
+        return row;
     }
 
     /**
@@ -69,6 +89,7 @@ public class BizProjectServiceImpl implements IBizProjectService
     public int updateBizProject(BizProject bizProject)
     {
         bizProject.setUpdateTime(DateUtils.getNowDate());
+        dictDataService.updateProjectTypeDict(bizProject.getId().toString(), bizProject.getProjectName());
         return bizProjectMapper.updateBizProject(bizProject);
     }
 

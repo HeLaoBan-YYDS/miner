@@ -25,7 +25,7 @@ import java.security.spec.InvalidKeySpecException;
 
 @RestController
 @RequestMapping("/app/withdraw")
-@Api(tags = "提现管理")
+@Api(tags = "APP端提现管理")
 public class AppWithdrawController {
 
     @Autowired

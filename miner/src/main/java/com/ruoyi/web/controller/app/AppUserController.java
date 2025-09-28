@@ -23,10 +23,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -56,6 +53,7 @@ public class AppUserController extends BaseController {
     @Log(title = "修改密码", businessType = BusinessType.UPDATE)
     @PutMapping("/updatePwd")
     @Anonymous
+    @ApiOperation("修改密码")
     public AjaxResult updatePwd(@RequestBody LoginBody user) {
         registerService.validateCaptcha(null, user.getCode(), user.getUsername());
 
@@ -73,7 +71,7 @@ public class AppUserController extends BaseController {
     }
 
 
-    @PutMapping("/info")
+    @GetMapping("/info")
     @PreAuthorize("@ss.hasRole('user')")
     @ApiOperation("用户信息")
     public AjaxResult userinfo() {
@@ -104,11 +102,15 @@ public class AppUserController extends BaseController {
         //每日单T产出
         String dailyYieldPerT = configService.selectConfigByKey("daily_per_t_yield");
 
+        //电费
+        String dailyPowerFee = configService.selectConfigByKey("daily_power_fee");
+
         UserInfoVo userInfoVo = new UserInfoVo();
         userInfoVo.setDailyYieldPerT(dailyYieldPerT);
         userInfoVo.setMyTotalComputePower(myTotalComputePower);
         userInfoVo.setUsdtAccount(sysUser.getAccount());
         userInfoVo.setBtcAccount(sysUser.getBtcAccount());
+        userInfoVo.setDailyPowerFee(dailyPowerFee);
         return success(userInfoVo);
     }
 }

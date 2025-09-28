@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.gson.Gson;
@@ -23,6 +24,7 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.enums.CoinType;
 import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.HttpUtil;
 import com.ruoyi.common.utils.SignUtil;
@@ -196,10 +198,10 @@ public class BizAddressServiceImpl implements IBizAddressService {
         //如果地址已经使用完 则从链上获取
         List<String> addresses = this.getRemoteAddress(coinType);
         //获取地址失败了
-        if (null == addresses) {
-            return null;
+        if (CollUtil.isEmpty(addresses)) {
+            throw new ServiceException("get.address.fail" );
         }
-        String address = addresses.stream().findFirst().get();
+        String address = addresses.get(0);
         //同步状态
         boolean sycFlag = this.syncStatus(address, String.valueOf(loginUser.getUserId()), coinType);
         if (!sycFlag) {
@@ -378,12 +380,12 @@ public class BizAddressServiceImpl implements IBizAddressService {
             params.put("sign", new SignUtil().genSign(params, ownerPriKey));
             Gson gson = new GsonBuilder().create();
             JsonParser jp = new JsonParser();
-            log.info("获取原则地址params = {}", gson.toJson(params));
+            log.info("获取热钱包地址params = {}", gson.toJson(params));
             String res = HttpUtil.doPost(baseUrl + getAddressBatchUrl, gson.toJson(params));
             if (null == res) {
                 throw new RuntimeException("获取充值地址接口请求失败");
             }
-            log.info("获取原则地址response = {}", res);
+            log.info("获获取热钱包地址response = {}", res);
             JsonObject resEle1 = jp.parse(res).getAsJsonObject();
             boolean retSignOK = new SignUtil().verifySign(resEle1, resEle1.get("sign").getAsString(), pubKey);
             if (!retSignOK) {

@@ -10,6 +10,8 @@ import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.BizProject;
 import com.ruoyi.system.domain.vo.ProjectVo;
 import com.ruoyi.system.service.IBizProjectService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/app/project")
+@Api(tags = "项目基本信息")
 public class AppBizProjectController extends BaseController
 {
     @Autowired
@@ -35,6 +38,7 @@ public class AppBizProjectController extends BaseController
      */
     @PreAuthorize("@ss.hasRole('user')")
     @GetMapping("/list")
+    @ApiOperation("项目列表")
     public TableDataInfo list(BizProject bizProject)
     {
         startPage();
@@ -44,59 +48,7 @@ public class AppBizProjectController extends BaseController
         return getDataTable(list);
     }
 
-    /**
-     * 导出项目基本信息列表
-     */
-    @PreAuthorize("@ss.hasPermi('system:project:export')")
-    @Log(title = "项目基本信息", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
-    public void export(HttpServletResponse response, BizProject bizProject)
-    {
-        List<BizProject> list = bizProjectService.selectBizProjectList(bizProject);
-        ExcelUtil<BizProject> util = new ExcelUtil<BizProject>(BizProject.class);
-        util.exportExcel(response, list, "项目基本信息数据");
-    }
 
-    /**
-     * 获取项目基本信息详细信息
-     */
-    @PreAuthorize("@ss.hasPermi('system:project:query')")
-    @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
-        return success(bizProjectService.selectBizProjectById(id));
-    }
 
-    /**
-     * 新增项目基本信息
-     */
-    @PreAuthorize("@ss.hasPermi('system:project:add')")
-    @Log(title = "项目基本信息", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody BizProject bizProject)
-    {
-        return toAjax(bizProjectService.insertBizProject(bizProject));
-    }
 
-    /**
-     * 修改项目基本信息
-     */
-    @PreAuthorize("@ss.hasPermi('system:project:edit')")
-    @Log(title = "项目基本信息", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody BizProject bizProject)
-    {
-        return toAjax(bizProjectService.updateBizProject(bizProject));
-    }
-
-    /**
-     * 删除项目基本信息
-     */
-    @PreAuthorize("@ss.hasPermi('system:project:remove')")
-    @Log(title = "项目基本信息", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
-        return toAjax(bizProjectService.deleteBizProjectByIds(ids));
-    }
 }

@@ -2,6 +2,7 @@ package com.ruoyi.task;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.enums.*;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
@@ -11,8 +12,10 @@ import com.ruoyi.system.domain.BizOrder;
 import com.ruoyi.system.domain.BizProject;
 import com.ruoyi.system.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -44,7 +47,14 @@ public class SendIncomeTask {
     @Autowired
     private IBizProjectService projectService;
 
+    @Autowired
+    @Lazy
+    private SendIncomeTask sendIncomeTask;
+
     private Map<Long, BizProject> projectMap = new HashMap<>();
+
+    @Autowired
+    private ISysUserService sysUserService;
 
     //每日产出单位是比特
    private String dailyYieldPerTStr = "0";
@@ -61,7 +71,7 @@ public class SendIncomeTask {
         Date endOfDay = DateUtil.endOfDay(now);
         BizLog bizLogCondition = new BizLog();
         bizLogCondition.setLogType(LogType.INCOME.getCode());
-        bizLogCondition.getParams().put("startTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, startOfDay));
+        bizLogCondition.getParams().put("beginTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, startOfDay));
         bizLogCondition.getParams().put("endTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, endOfDay));
         List<BizLog> issuedRewards = bizLogService.selectBizLogList(bizLogCondition);
         List<String> issuedRewardsOrderNo = issuedRewards.stream().map(BizLog::getOrderNo).collect(Collectors.toList());
@@ -102,7 +112,7 @@ public class SendIncomeTask {
             throw new ServiceException(msg);
         }
 
-        SendIncomeTask sendIncomeTask = SpringUtils.getBean(SendIncomeTask.class);
+
         if (CollectionUtils.isEmpty(bizOrderList)) {
             throw new ServiceException("sendIncomeTaskBean 获取失败");
         }
@@ -120,6 +130,15 @@ public class SendIncomeTask {
                     //未到达收益开始时间，跳过
                     continue;
                 }
+
+
+                if (now.after(DateUtil.offsetDay(earningStartTime, Math.toIntExact(bizOrder.getIncomeCycle())))) {
+                    //超过收益结束时间，更新订单状态为已结束
+                    bizOrder.setStatus(OrderStatusEnum.ENDED.getCode());
+                    orderService.updateBizOrder(bizOrder);
+                    continue;
+                }
+
                 //到达收益开始时间，更新订单状态为收益中
                 bizOrder.setStatus(OrderStatusEnum.EARNING.getCode());
                 orderService.updateBizOrder(bizOrder);
@@ -132,7 +151,12 @@ public class SendIncomeTask {
                    continue;
                }
 
-                sendIncomeTask.handlerOrderIncome(bizOrder);
+                try {
+                    sendIncomeTask.handlerOrderIncome(bizOrder);
+                } catch (Exception e) {
+                    log.error("订单收益发放失败，订单号：{}", bizOrder.getOrderId(), e);
+                    continue;
+                }
             }
         }
     }
@@ -152,19 +176,27 @@ public class SendIncomeTask {
         saveIncomeLog(bizOrder, income);
     }
 
-    private void savePowerFeeLog(BizOrder bizOrder, BigDecimal orderComputePower) {
+    private void savePowerFeeLog(BizOrder bizOrder, BigDecimal orderPowerFee) {
+        SysUser user = sysUserService.selectUserById(bizOrder.getUserId());
+        BigDecimal beforeAmount = user.getAccount().add(orderPowerFee.negate());
         BizLog powerFeeLog = new BizLog();
         powerFeeLog.setUserId(bizOrder.getUserId());
         powerFeeLog.setOrderNo(bizOrder.getOrderId());
         powerFeeLog.setLogType(LogType.POWER_FEE.getCode());
         powerFeeLog.setCoinType(CoinType.USDT.getCode());
-        powerFeeLog.setAmount(orderComputePower);
+        powerFeeLog.setAmount(orderPowerFee);
         powerFeeLog.setCreateTime(new Date());
         powerFeeLog.setLogStatus(LogStatus.SUCCESS.getCode());
+        powerFeeLog.setBeforeAmount(beforeAmount);
         bizLogService.insertBizLog(powerFeeLog);
     }
 
     private void saveIncomeLog(BizOrder bizOrder, BigDecimal income) {
+        SysUser user = sysUserService.selectUserById(bizOrder.getUserId());
+        BigDecimal beforeAmount = user.getAccount().subtract(income);
+        if (BigDecimal.ZERO.compareTo(beforeAmount) > 0){
+            beforeAmount = BigDecimal.ZERO;
+        }
         BizLog bizLog = new BizLog();
         bizLog.setUserId(bizOrder.getUserId());
         bizLog.setOrderNo(bizOrder.getOrderId());
@@ -172,6 +204,7 @@ public class SendIncomeTask {
         bizLog.setCoinType(CoinType.BTC.getCode());
         bizLog.setAmount(income);
         bizLog.setCreateTime(new Date());
+        bizLog.setBeforeAmount(beforeAmount);
         bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
         bizLogService.insertBizLog(bizLog);
     }
@@ -206,6 +239,7 @@ public class SendIncomeTask {
                 .divide(computePower, 8, RoundingMode.DOWN)
                 .multiply(orderComputePower)
                 .multiply(powerFee)
+                .multiply(new BigDecimal("24")) //24小时
                 .setScale(8, RoundingMode.DOWN).negate();
 
         try {
@@ -213,12 +247,17 @@ public class SendIncomeTask {
         } catch (Exception e) {
             String msg = String.format("扣除电费失败,订单号:%s,用户ID:%s,电费:%s", bizOrder.getOrderId(), bizOrder.getUserId(), electricityFee);
             log.error("发放收益失败,电费不够订单号:{},用户ID:{}", bizOrder.getOrderId(), bizOrder.getUserId());
-            bizOrder.setStatus(OrderStatusEnum.POWER_ARREARS.getCode());
-            orderService.updateBizOrder(bizOrder);
+            sendIncomeTask.updateOrderToPowerArrears(bizOrder);
             throw new ServiceException(msg);
         }
 
-        return orderComputePower;
+        return electricityFee;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateOrderToPowerArrears(BizOrder bizOrder) {
+        bizOrder.setStatus(OrderStatusEnum.POWER_ARREARS.getCode());
+        orderService.updateBizOrder(bizOrder);
     }
 
 

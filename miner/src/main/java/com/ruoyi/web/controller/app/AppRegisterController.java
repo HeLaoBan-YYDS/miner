@@ -11,6 +11,8 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.*;
 import com.ruoyi.framework.web.service.SysRegisterService;
 import com.ruoyi.system.service.ISysConfigService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,7 @@ import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
  * @author ruoyi
  */
 @RestController
+@Api(tags = "注册管理")
 public class AppRegisterController extends BaseController {
     @Autowired
     private SysRegisterService registerService;
@@ -44,8 +47,10 @@ public class AppRegisterController extends BaseController {
 
     @PostMapping("/app/register")
     @Anonymous
+    @Log(title = "注册", businessType = BusinessType.OTHER)
+    @ApiOperation("用户注册")
     public AjaxResult register(@RequestBody RegisterBody user) {
-        if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser")))) {
+        if (!("true".equals(configService.selectConfigByKey("app.account.registerUser")))) {
             return error(MessageUtils.message("system.register.disabled"));
         }
         String msg = registerService.register(user);
@@ -56,6 +61,7 @@ public class AppRegisterController extends BaseController {
     @GetMapping("/app/sendSmsCode")
     @Log(title = "发送验证码", businessType = BusinessType.OTHER)
     @Anonymous
+    @ApiOperation("发送邮箱验证码")
     public AjaxResult sendSmsCode(String sign) {
 
         String email;

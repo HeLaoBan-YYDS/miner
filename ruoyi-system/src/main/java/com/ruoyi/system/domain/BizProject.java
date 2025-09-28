@@ -28,7 +28,7 @@ public class BizProject extends BaseEntity
     private BigDecimal computePower;
 
     /** 功耗(W) */
-    @Excel(name = "功耗(W)")
+    @Excel(name = "功耗(KW)")
     private BigDecimal powerConsumption;
 
     /** 单价(U/T) */

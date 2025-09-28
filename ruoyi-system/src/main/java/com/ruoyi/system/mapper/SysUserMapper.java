@@ -154,8 +154,8 @@ public interface SysUserMapper
      * @param amount 金额
      * @return 结果
      */
-    public int updateAccount(Long userId, BigDecimal amount);
+    public int updateAccount(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
 
 
-    int updateBTCAccount(Long userId, BigDecimal amount);
+    int updateBTCAccount(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
 }

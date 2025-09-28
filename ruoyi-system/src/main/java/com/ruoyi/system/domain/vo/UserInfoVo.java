@@ -23,4 +23,6 @@ public class UserInfoVo {
    private BigDecimal usdtAccount;
 
    private BigDecimal btcAccount;
+
+   private String dailyPowerFee;
 }

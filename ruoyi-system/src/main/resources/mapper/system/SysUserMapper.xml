@@ -216,11 +216,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 
 	<update id="updateAccount">
-	    update sys_user set account = account + #{amount} where user_id = #{userId} and account + #{account} >= 0
+	    update sys_user set account = account + #{amount} where user_id = #{userId} and account + #{amount} >= 0
 	</update>
 
 	<update id="updateBTCAccount">
-		update sys_user set btc_account = btc_account + #{amount} where user_id = #{userId} and btc_account + #{account} >= 0
+		update sys_user set btc_account = btc_account + #{amount} where user_id = #{userId} and btc_account + #{amount} >= 0
 	</update>
 
 	<delete id="deleteUserById" parameterType="Long">
