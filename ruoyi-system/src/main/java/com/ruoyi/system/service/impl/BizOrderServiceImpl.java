@@ -2,10 +2,15 @@ package com.ruoyi.system.service.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.CoinType;
 import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
@@ -46,6 +51,9 @@ public class BizOrderServiceImpl implements IBizOrderService
 
     @Autowired
     private BizLogMapper bizLogMapper;
+
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 查询订单
@@ -178,5 +186,56 @@ public class BizOrderServiceImpl implements IBizOrderService
         bizLog.setCoinType(CoinType.USDT.getCode());
         bizLog.setBeforeAmount(user.getAccount());
         bizLogMapper.insertBizLog(bizLog);
+    }
+
+
+    @Override
+    public BigDecimal getYesterdayIncome(Long userId) {
+        String redisKey = "YESTERDAY_INCOME_" + userId;
+        String yIncome = redisCache.getCacheObject(redisKey);
+        if (yIncome != null) {
+            return new BigDecimal(yIncome);
+        }
+
+        Date todayStart = DateUtil.beginOfDay(new Date());
+        Date todayEnd = DateUtil.endOfDay(new Date());
+        Date yesterdayStart = DateUtils.addDays(todayStart, -1);
+        Date yesterdayEnd = DateUtils.addDays(todayEnd, -1);
+        BigDecimal income = getIncomeByRange(userId, yesterdayStart, yesterdayEnd);
+        yIncome = income.toString();
+        redisCache.setCacheObject(redisKey,yIncome,5, TimeUnit.MINUTES);
+        return income;
+    }
+
+
+
+    @Override
+    public BigDecimal getTotalIncome(Long userId) {
+        String redisKey = "TOTAL_INCOME_" + userId;
+        String tIncome = redisCache.getCacheObject(redisKey);
+        if (tIncome != null) {
+            return new BigDecimal(tIncome);
+        }
+        BigDecimal income = getIncomeByRange(userId, null, null);
+        tIncome = income.toString();
+        redisCache.setCacheObject(redisKey,tIncome,5, TimeUnit.MINUTES);
+        return income;
+    }
+
+    private BigDecimal getIncomeByRange(Long userId, Date yesterdayStart, Date yesterdayEnd) {
+        BizLog bizLog = new BizLog();
+        bizLog.setLogType(LogType.INCOME.getCode());
+        bizLog.setUserId(userId);
+        if (yesterdayStart !=null){
+            bizLog.getParams().put("beginTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, yesterdayStart));
+        }
+        if (yesterdayEnd !=null){
+            bizLog.getParams().put("endTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, yesterdayEnd));
+        }
+        List<BizLog> bizLogs = bizLogMapper.selectBizLogList(bizLog);
+        if (CollUtil.isEmpty(bizLogs)) {
+            return BigDecimal.ZERO;
+        }
+        return bizLogs.stream().map(BizLog::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

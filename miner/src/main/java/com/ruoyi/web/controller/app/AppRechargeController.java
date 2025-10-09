@@ -9,6 +9,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.service.IBizAddressService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.security.spec.InvalidKeySpecException;
 @RestController
 @RequestMapping("/app/recharge")
 @Api(tags = "充值管理")
+@Slf4j
 public class AppRechargeController {
 
 
@@ -61,5 +63,19 @@ public class AppRechargeController {
     public String callBack(@RequestBody  String  data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         String result = bizAddressService.callBack(data);
         return  result;
+    }
+
+
+    /**
+     * 风控回调
+     * @return
+     */
+    @PostMapping("/riskCallback")
+    @Anonymous
+    public String riskCallback(@RequestBody  String  data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
+        log.info("风控回调:{}",data);
+        String result = bizAddressService.riskCallback(data);
+        return  result;
+
     }
 }

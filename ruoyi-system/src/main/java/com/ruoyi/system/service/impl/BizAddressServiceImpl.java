@@ -267,6 +267,83 @@ public class BizAddressServiceImpl implements IBizAddressService {
         }
     }
 
+    @Override
+    public String riskCallback(String res) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        JsonParser jp = new JsonParser();
+        JsonObject resEle = jp.parse(res).getAsJsonObject();
+        Map<String, Object> params = new HashMap<>();
+        JSONObject data = new JSONObject();
+        Map<String, String> jsonObject = new SignUtil().toStringMap(resEle.get("data"));
+        data.put("timestamp", System.currentTimeMillis() / 1000);
+        try {
+            log.info("提现风控回调:{}", res);
+            boolean flag = new SignUtil().verifySign(resEle.get("data"), resEle.get("sign").getAsString(), fenkongPubKey);
+            log.info("提现风控回调验签:{}", flag);
+            if (!flag) {
+                //验签不通过
+                data.put("status_code", 5400);
+                data.put("order_id", jsonObject.get("order_id"));
+                params.put("sign", new SignUtil().genSign(data, ownerPriKey));
+                params.put("data", data);
+                params.put("status", 5400);
+                Gson gson = new GsonBuilder().create();
+                return gson.toJson(params);
+            }
+            //获取参数 和 数据库数据进行比对
+            log.info("提现风控回调 order Id:{}", jsonObject.get("order_id"));
+            //获取交易ID 查询 提现记录数据
+            BizLog bizLog = bizLogMapper.selectBizLogByLogId(Long.valueOf(jsonObject.get("order_id")));
+            if (null == bizLog) {
+                //不存在
+                log.info("提现风控回调 订单不存在-----");
+                data.put("status_code", 5400);
+                data.put("order_id", jsonObject.get("order_id"));
+                params.put("sign", new SignUtil().genSign(data, ownerPriKey));
+                params.put("data", data);
+                params.put("status", 5400);
+                Gson gson = new GsonBuilder().create();
+                return gson.toJson(params);
+            }
+            //订单存在  需要对比 金额 地址等是否 一样
+            int code = this.comparamInfo(bizLog, jsonObject);
+            log.info("提现风控回调 数据比对 code:{}", code);
+            data.put("status_code", code);
+            data.put("order_id", jsonObject.get("order_id"));
+            Gson gson = new GsonBuilder().create();
+            params.put("sign", new SignUtil().genSign(data, ownerPriKey));
+            params.put("data", data);
+            params.put("status", code);
+            log.info("风控提现返回：{}", gson.toJson(params));
+            return gson.toJson(params);
+        } catch (Exception e) {
+            data.put("status_code", 5007);
+            data.put("order_id", jsonObject.get("order_id"));
+            params.put("sign", new SignUtil().genSign(data, ownerPriKey));
+            params.put("data", data);
+            params.put("status", 5007);
+            Gson gson = new GsonBuilder().create();
+            return gson.toJson(params);
+        }
+    }
+
+
+    /**
+     * 对比
+     *
+     * @param bizLog
+     * @param jsonObject
+     * @return
+     */
+    private int comparamInfo(BizLog bizLog, Map<String, String> jsonObject) {
+        //默认是审核通过
+        int code = 200;
+        //地址不一致
+        if (!bizLog.getAddress().trim().equals(String.valueOf(jsonObject.get("address")))) {
+            code = 5004;
+        }
+        return code;
+    }
+
 
     /**
      * 保存充值记录

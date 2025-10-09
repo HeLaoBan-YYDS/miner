@@ -17,7 +17,6 @@ public class WithdrawDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @DecimalMin(value = "0.01", message = "{amount.min}")
-    @NotBlank(message = "{amount.notblank}")
     private BigDecimal amount;
 
 

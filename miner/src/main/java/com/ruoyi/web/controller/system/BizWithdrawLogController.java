@@ -45,6 +45,9 @@ public class BizWithdrawLogController extends BaseController
         startPage();
         bizLog.setLogType(LogType.WITHDRAW.getCode());
         List<BizLog> list = bizLogService.selectBizLogList(bizLog);
+        for (BizLog log : list) {
+            log.setAmount(log.getAmount().negate());
+        }
         return getDataTable(list);
     }
 
@@ -69,10 +72,10 @@ public class BizWithdrawLogController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:log:remove')")
     @Log(title = "提现审核通过", businessType = BusinessType.DELETE)
-    @GetMapping("/pass")
+    @GetMapping("/pass/{id}")
     @RepeatSubmit
     @ApiOperation("提现审核通过")
-    public AjaxResult handlePass(@RequestParam("id") Long id)
+    public AjaxResult handlePass(@PathVariable("id") Long id)
     {
         bizWithdrawService.handlePass(id);
         return success();
@@ -80,10 +83,10 @@ public class BizWithdrawLogController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('system:log:remove')")
     @Log(title = "提现审核不通过", businessType = BusinessType.DELETE)
-    @GetMapping("/noPass")
+    @GetMapping("/noPass/{id}")
     @RepeatSubmit
     @ApiOperation("提现审核不通过")
-    public AjaxResult handleNoPass(@RequestParam("id") Long id)
+    public AjaxResult handleNoPass(@PathVariable("id") Long id)
     {
         bizWithdrawService.handleNoPass(id);
         return success();

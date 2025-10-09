@@ -45,11 +45,16 @@ public enum CoinType {
      * 根据code获取枚举
      */
     public static Optional<CoinType> getByCode(String code) {
+        if ("usdt_trc20".equals(code)) {
+            code = "usdt";
+        }
+
         if (StringUtils.isBlank(code)) {
             return Optional.empty();
         }
+        String finalCode = code;
         return Arrays.stream(values())
-                .filter(e -> e.getCode().equalsIgnoreCase(code))
+                .filter(e -> e.getCode().equalsIgnoreCase(finalCode))
                 .findFirst();
     }
 

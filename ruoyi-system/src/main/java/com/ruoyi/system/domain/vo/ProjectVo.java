@@ -1,10 +1,15 @@
 package com.ruoyi.system.domain.vo;
 
 import java.math.BigDecimal;
+import java.util.Date;
+
+import cn.hutool.core.date.DateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
+
+import javax.xml.crypto.Data;
 
 /**
  * 项目基本信息对象 biz_project
@@ -28,7 +33,7 @@ public class ProjectVo extends BaseEntity
     private BigDecimal computePower;
 
     /** 功耗(W) */
-    @Excel(name = "功耗(W)")
+    @Excel(name = "功耗(KW)")
     private BigDecimal powerConsumption;
 
     /** 单价(U/T) */
@@ -54,6 +59,21 @@ public class ProjectVo extends BaseEntity
     /** 项目描述 */
     @Excel(name = "项目描述")
     private String description;
+
+
+    public String getStartMiningTime() {
+        if (waitingPeriod == null || incomeCycle == null){
+            return null;
+        }
+        return DateUtil.offsetDay(new Date(), waitingPeriod.intValue()).toString();
+    }
+
+    public String getEndMiningTime() {
+        if (waitingPeriod == null || incomeCycle == null){
+            return null;
+        }
+        return DateUtil.offsetDay(new Date(), incomeCycle.intValue() + waitingPeriod.intValue()).toString();
+    }
 
     public String getIntro() {
         return intro;

@@ -18,9 +18,7 @@ import com.ruoyi.common.utils.SignUtil;
 import com.ruoyi.system.domain.*;
 import com.ruoyi.system.domain.dto.WithdrawDTO;
 import com.ruoyi.system.mapper.BizLogMapper;
-import com.ruoyi.system.service.IBizWithdrawService;
-import com.ruoyi.system.service.ISysOperLogService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +65,8 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
 
     @Value("${external.hotWallet.baseUrl}")
     public String baseUrl;
+    @Autowired
+    private IBizLogService bizLogService;
 
 
     /**
@@ -155,7 +155,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
         //退款
         BigDecimal returnAmount = withdrawLog.getAmount().negate();
         try {
-            userService.updateAccount(withdrawLog.getUserId(), returnAmount, CoinType.getByCode(withdrawLog.getLogType()).orElse(null));
+            userService.updateAccount(withdrawLog.getUserId(), returnAmount, CoinType.getByCode(withdrawLog.getCoinType()).orElse(null));
         } catch (Exception e) {
             throw new ServiceException(e.getMessage());
         }
@@ -199,7 +199,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
         bizLog.setOrderNo(tradeNo);
         bizLog.setBeforeAmount(user.getAccount());
         bizLog.setAddress(withdrawDTO.getAddress());
-        bizLogMapper.insertBizLog(bizLog);
+        bizLogService.insertBizLog(bizLog);
     }
 
 
@@ -226,7 +226,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
         params.put("user_id", withdrawLog.getUserId());
         params.put("coin", CoinType.getCoin(withdrawLog.getCoinType()));
         params.put("address", withdrawLog.getAddress().trim());
-        params.put("amount", withdrawLog.getAmount());
+        params.put("amount", withdrawLog.getAmount().negate().stripTrailingZeros().toPlainString());
         params.put("trade_id", withdrawLog.getOrderNo());
         try {
             params.put("sign", new SignUtil().genSign(params, ownerPriKey));

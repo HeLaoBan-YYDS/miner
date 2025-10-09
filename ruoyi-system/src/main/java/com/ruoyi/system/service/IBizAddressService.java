@@ -80,4 +80,11 @@ public interface IBizAddressService
      * @return 结果
      */
     String callBack(String data) throws NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException;
+
+    /**
+     * 风控回调
+     * @param data
+     * @return
+     */
+    String riskCallback(String data) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, SignatureException;
 }

@@ -34,6 +34,7 @@
 		<result property="minPurchase" column="min_purchase"/>
 		<result property="waitingPeriod" column="waiting_period"/>
 		<result property="incomeCycle" column="income_cycle"/>
+		<result property="createTime" column="create_time"/>
 
 		<!-- 多语言字段 -->
 		<result property="intro" column="intro"/>
@@ -55,7 +56,8 @@
 			p.waiting_period,
 			p.income_cycle,
 			i.intro,
-			i.description
+			i.description,
+			p.create_time
 		FROM biz_project p
 		LEFT JOIN biz_project_i18n i ON p.id = i.project_id
 		AND i.lang_code = #{params.langCode}

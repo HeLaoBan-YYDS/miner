@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,7 @@ public class BizLogVo {
 
     private BigDecimal orderComputePower;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
     private BigDecimal incomeAmount;

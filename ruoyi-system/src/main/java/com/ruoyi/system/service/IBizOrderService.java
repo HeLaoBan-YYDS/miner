@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.system.domain.BizOrder;
 import com.ruoyi.system.domain.dto.PlaceDTO;
@@ -65,4 +66,18 @@ public interface IBizOrderService
      * @param placeDTO  下单信息
      */
     void place(PlaceDTO placeDTO);
+
+    /**
+     * 获取昨日收益
+     * @param userId 用户ID
+     * @return
+     */
+    public BigDecimal getYesterdayIncome(Long userId);
+
+    /**
+     * 获取总收益
+     * @param userId 用户ID
+     * @return
+     */
+    public BigDecimal getTotalIncome(Long userId);
 }

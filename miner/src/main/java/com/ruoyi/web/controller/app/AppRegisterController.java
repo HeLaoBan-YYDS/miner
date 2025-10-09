@@ -59,7 +59,6 @@ public class AppRegisterController extends BaseController {
 
 
     @GetMapping("/app/sendSmsCode")
-    @Log(title = "发送验证码", businessType = BusinessType.OTHER)
     @Anonymous
     @ApiOperation("发送邮箱验证码")
     public AjaxResult sendSmsCode(String sign) {
