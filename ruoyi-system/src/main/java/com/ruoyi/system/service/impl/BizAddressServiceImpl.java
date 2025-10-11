@@ -1,15 +1,14 @@
 package com.ruoyi.system.service.impl;
 
 import java.math.BigDecimal;
-import java.rmi.ServerException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 import cn.hutool.core.collection.CollUtil;
@@ -21,16 +20,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.CoinType;
 import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.HttpUtil;
-import com.ruoyi.common.utils.SignUtil;
+import com.ruoyi.common.utils.*;
 import com.ruoyi.system.domain.*;
-import com.ruoyi.system.mapper.BizLogMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
+import com.ruoyi.system.service.IBizLogService;
 import com.ruoyi.system.service.ISysOperLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +85,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
     private SysUserMapper sysUserMapper;
 
     @Autowired
-    private BizLogMapper bizLogMapper;
+    private IBizLogService bizLogService;
 
     /**
      * 查询充值地址管理
@@ -199,7 +197,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
         List<String> addresses = this.getRemoteAddress(coinType);
         //获取地址失败了
         if (CollUtil.isEmpty(addresses)) {
-            throw new ServiceException("get.address.fail" );
+            throw new ServiceException(MessageUtils.message("get.address.fail"));
         }
         String address = addresses.get(0);
         //同步状态
@@ -245,8 +243,8 @@ public class BizAddressServiceImpl implements IBizAddressService {
                 params.put("sign", new SignUtil().genSign(params, ownerPriKey));
                 params.put("data", data);
                 params.put("status", 200);
-                BizCallReq aiuCallReq = JSON.toJavaObject(res, BizCallReq.class);
-                this.insertInfoAndUpdateAccount(aiuCallReq);
+                BizCallReq bizCallReq = JSON.toJavaObject(res, BizCallReq.class);
+                this.insertInfoAndUpdateAccount(bizCallReq);
                 return gson.toJson(params);
             } else {
                 data.put("success_data", "fail");
@@ -257,6 +255,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
                 return gson.toJson(params);
             }
         } catch (Exception e) {
+            log.error("充值回调异常", e);
             saveErrorLog(res, e);
             data.put("success_data", "fail");
             params.put("sign", new SignUtil().genSign(params, ownerPriKey));
@@ -275,6 +274,12 @@ public class BizAddressServiceImpl implements IBizAddressService {
         JSONObject data = new JSONObject();
         Map<String, String> jsonObject = new SignUtil().toStringMap(resEle.get("data"));
         data.put("timestamp", System.currentTimeMillis() / 1000);
+        SysOperLog sysOperLog = new SysOperLog();
+        sysOperLog.setTitle("风控回调");
+        sysOperLog.setOperParam(res);
+        sysOperLog.setStatus(0);
+        sysOperLog.setOperTime(new Date());
+        sysOperLog.setOperName("Remi");
         try {
             log.info("提现风控回调:{}", res);
             boolean flag = new SignUtil().verifySign(resEle.get("data"), resEle.get("sign").getAsString(), fenkongPubKey);
@@ -287,12 +292,14 @@ public class BizAddressServiceImpl implements IBizAddressService {
                 params.put("data", data);
                 params.put("status", 5400);
                 Gson gson = new GsonBuilder().create();
+                sysOperLog.setStatus(1);
+                sysOperLog.setErrorMsg("风控回调验签失败");
                 return gson.toJson(params);
             }
             //获取参数 和 数据库数据进行比对
             log.info("提现风控回调 order Id:{}", jsonObject.get("order_id"));
             //获取交易ID 查询 提现记录数据
-            BizLog bizLog = bizLogMapper.selectBizLogByLogId(Long.valueOf(jsonObject.get("order_id")));
+            BizLog bizLog = bizLogService.selectBizLogByOrderNo(jsonObject.get("order_id"));
             if (null == bizLog) {
                 //不存在
                 log.info("提现风控回调 订单不存在-----");
@@ -302,6 +309,8 @@ public class BizAddressServiceImpl implements IBizAddressService {
                 params.put("data", data);
                 params.put("status", 5400);
                 Gson gson = new GsonBuilder().create();
+                sysOperLog.setStatus(1);
+                sysOperLog.setErrorMsg("订单不存在");
                 return gson.toJson(params);
             }
             //订单存在  需要对比 金额 地址等是否 一样
@@ -314,6 +323,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
             params.put("data", data);
             params.put("status", code);
             log.info("风控提现返回：{}", gson.toJson(params));
+            sysOperLog.setJsonResult("风控结果:"+gson.toJson(params));
             return gson.toJson(params);
         } catch (Exception e) {
             data.put("status_code", 5007);
@@ -322,7 +332,11 @@ public class BizAddressServiceImpl implements IBizAddressService {
             params.put("data", data);
             params.put("status", 5007);
             Gson gson = new GsonBuilder().create();
+            sysOperLog.setStatus(1);
+            sysOperLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
             return gson.toJson(params);
+        } finally {
+            operLogService.insertOperlog(sysOperLog);
         }
     }
 
@@ -389,7 +403,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
         bizLog.setCoinType(CoinType.USDT.getCode());
         bizLog.setLogType(LogType.RECHARGE.getCode());
         bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
-        bizLogMapper.insertBizLog(bizLog);
+        bizLogService.insertBizLog(bizLog);
     }
 
 
@@ -397,7 +411,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
         SysOperLog sysOperLog = new SysOperLog();
         sysOperLog.setTitle("充值回调异常");
         sysOperLog.setOperParam(res);
-        sysOperLog.setErrorMsg(e.getMessage());
+        sysOperLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
         operLogService.insertOperlog(sysOperLog);
     }
 

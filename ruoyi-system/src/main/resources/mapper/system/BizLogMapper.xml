@@ -45,11 +45,17 @@
 				AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
 			</if>
 		</where>
+		order by create_time desc
 	</select>
 
 	<select id="selectBizLogByLogId" parameterType="Long" resultMap="BizLogResult">
 		<include refid="selectBizLogVo"/>
 		where log_id = #{logId}
+	</select>
+
+	<select id="selectBizLogByOrderNo" resultType="com.ruoyi.system.domain.BizLog">
+		<include refid="selectBizLogVo"/>
+		where order_no = #{orderNo}
 	</select>
 
 	<insert id="insertBizLog" parameterType="BizLog" useGeneratedKeys="true" keyProperty="logId">

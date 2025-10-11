@@ -6,9 +6,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONUtil;
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.CoinType;
@@ -16,10 +19,12 @@ import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
 import com.ruoyi.common.enums.OrderStatusEnum;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.OrderNoUtils;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizProject;
+import com.ruoyi.system.domain.ShareConfig;
 import com.ruoyi.system.domain.dto.PlaceDTO;
 import com.ruoyi.system.mapper.BizLogMapper;
 import com.ruoyi.system.service.IBizProjectService;
@@ -237,5 +242,18 @@ public class BizOrderServiceImpl implements IBizOrderService
             return BigDecimal.ZERO;
         }
         return bizLogs.stream().map(BizLog::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public List<ShareConfig> selectMode() {
+        List<SysDictData> shareMode = DictUtils.getDictCache("share_mode");
+        if (CollUtil.isNotEmpty(shareMode)&&shareMode != null) {
+            return shareMode.stream().map(d -> {
+                ShareConfig bean = JSONUtil.toBean(d.getDictValue(), ShareConfig.class);
+                bean.setId(d.getDictCode());
+                return bean;
+            }).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }

@@ -33,7 +33,6 @@ public class AppWithdrawController {
 
     @PostMapping("/callback")
     @Anonymous
-    @Log(title = "提现回调", businessType = BusinessType.UPDATE)
     public String transferCallback(@RequestBody String data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         return withdrawService.withdrawCallback(data);
     }

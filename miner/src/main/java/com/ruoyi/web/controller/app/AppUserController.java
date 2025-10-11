@@ -122,7 +122,6 @@ public class AppUserController extends BaseController {
         //平台算力
         String platformTotalComputePower = configService.selectConfigByKey("platform_total_compute_power") == null ? "0" : configService.selectConfigByKey("platform_total_compute_power");
 
-
         //昨日奖励
         BigDecimal yesterdayIncome = orderService.getYesterdayIncome(loginUser.getUserId());
 
@@ -164,6 +163,9 @@ public class AppUserController extends BaseController {
         List<BizLog> list = bizLogService.selectBizLogList(bizLog);
         return getDataTable(list);
     }
+
+
+
 
 
 }

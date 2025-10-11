@@ -59,7 +59,7 @@ public class AppRechargeController {
      */
     @PostMapping("/callback")
     @Anonymous
-    @Log(title = "充值回调", businessType = com.ruoyi.common.enums.BusinessType.OTHER)
+    @ApiOperation("充值回调")
     public String callBack(@RequestBody  String  data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         String result = bizAddressService.callBack(data);
         return  result;
@@ -72,10 +72,10 @@ public class AppRechargeController {
      */
     @PostMapping("/riskCallback")
     @Anonymous
+    @ApiOperation("提现风控回调")
     public String riskCallback(@RequestBody  String  data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         log.info("风控回调:{}",data);
-        String result = bizAddressService.riskCallback(data);
-        return  result;
+        return bizAddressService.riskCallback(data);
 
     }
 }

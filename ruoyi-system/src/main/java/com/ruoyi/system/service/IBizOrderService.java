@@ -3,6 +3,7 @@ package com.ruoyi.system.service;
 import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.system.domain.BizOrder;
+import com.ruoyi.system.domain.ShareConfig;
 import com.ruoyi.system.domain.dto.PlaceDTO;
 
 /**
@@ -80,4 +81,10 @@ public interface IBizOrderService
      * @return
      */
     public BigDecimal getTotalIncome(Long userId);
+
+    /**
+     * 获取分红模式
+     * @return 分红模式
+     */
+    List<ShareConfig> selectMode();
 }

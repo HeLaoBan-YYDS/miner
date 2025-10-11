@@ -26,4 +26,9 @@ public class PlaceDTO implements Serializable {
      * 前端传入的价格
      */
     private BigDecimal paymentAmount;
+
+    /**
+     *收益模式
+     */
+    private Long shareModeId;
 }

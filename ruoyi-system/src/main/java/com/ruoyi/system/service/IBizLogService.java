@@ -20,6 +20,11 @@ public interface IBizLogService
     public BizLog selectBizLogByLogId(Long logId);
 
     /**
+     * 根据订单号查询资金流水
+     */
+    public BizLog selectBizLogByOrderNo(String orderNo);
+
+    /**
      * 查询资金流水列表
      *
      * @param bizLog 资金流水

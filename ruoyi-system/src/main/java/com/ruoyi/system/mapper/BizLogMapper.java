@@ -58,4 +58,9 @@ public interface BizLogMapper
      * @return 结果
      */
     public int deleteBizLogByLogIds(Long[] logIds);
+
+    /**
+     * 根据订单号查询资金流水
+     */
+    BizLog selectBizLogByOrderNo(String orderNo);
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.app;
 
 import cn.hutool.core.collection.CollUtil;
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
@@ -16,6 +17,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizOrder;
 import com.ruoyi.system.domain.BizProject;
+import com.ruoyi.system.domain.ShareConfig;
 import com.ruoyi.system.domain.dto.PlaceDTO;
 import com.ruoyi.system.domain.vo.BizLogVo;
 import com.ruoyi.system.domain.vo.ProjectVo;
@@ -64,9 +66,9 @@ public class AppOrderController extends BaseController {
     /**
      * 查询项目基本信息列表
      */
-    @PreAuthorize("@ss.hasRole('user')")
     @GetMapping("/list")
     @ApiOperation("我的订单列表-记得分页参数")
+    @Anonymous
     public TableDataInfo list(BizOrder bizOrder)
     {
         startPage();
@@ -117,4 +119,12 @@ public class AppOrderController extends BaseController {
         return getDataTable(bizLogVoList);
     }
 
+
+    @GetMapping("/mode")
+    @ApiOperation("获取分红模式")
+    @Anonymous
+    public AjaxResult mode() {
+        List<ShareConfig> shareConfigs = orderService.selectMode();
+        return success(shareConfigs);
+    }
 }

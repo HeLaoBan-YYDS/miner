@@ -7,14 +7,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.CoinType;
 import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.HttpUtil;
-import com.ruoyi.common.utils.MessageUtils;
-import com.ruoyi.common.utils.OrderNoUtils;
-import com.ruoyi.common.utils.SignUtil;
+import com.ruoyi.common.utils.*;
 import com.ruoyi.system.domain.*;
 import com.ruoyi.system.domain.dto.WithdrawDTO;
 import com.ruoyi.system.mapper.BizLogMapper;
@@ -137,7 +135,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
             params.put("status", -200);
             params.put("sign", new SignUtil().genSign(params, ownerPriKey));
             Gson gson = new GsonBuilder().create();
-            sysOperLog.setErrorMsg(e.getMessage());
+            sysOperLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
             sysOperLog.setStatus(1);
             return gson.toJson(params);
         } finally {
@@ -248,6 +246,8 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
             if (!code.equals("200")) {
                 throw new ServiceException("提现审核API返回数据异常:"+resEle);
             }
+            withdrawLog.setLogStatus(LogStatus.SUCCESS.getCode());
+            bizLogMapper.updateBizLog(withdrawLog);
         }catch (Exception e) {
             throw new ServiceException("提现审核失败:" + e.getMessage());
         }

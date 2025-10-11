@@ -92,4 +92,12 @@ public class BizLogServiceImpl implements IBizLogService
     {
         return bizLogMapper.deleteBizLogByLogId(logId);
     }
+
+    /**
+     * 根据订单号查询资金流水
+     */
+    @Override
+    public BizLog selectBizLogByOrderNo(String orderNo) {
+        return bizLogMapper.selectBizLogByOrderNo(orderNo);
+    }
 }

@@ -57,6 +57,11 @@ public class BizOrder extends BaseEntity
     @Excel(name = "收益周期(天)")
     private Long incomeCycle;
 
+    /**
+     * 分红模式
+     */
+    private Long shareModeId;
+
     /** 删除标志（0存在 2删除） */
     private String delFlag;
 
