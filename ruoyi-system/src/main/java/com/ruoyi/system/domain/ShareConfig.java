@@ -1,9 +1,9 @@
 package com.ruoyi.system.domain;
 
 import lombok.Data;
+
 import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * 分成配置
@@ -38,28 +38,42 @@ public class ShareConfig {
 
 
     /**
-     * 计算收益
-     * @param computePower 算力
-     * @param dailyYieldPerTStr 每T每日收益
-     * @param electricityFee 电费是负数单位U
-     * @return 收益
+     * 计算用户能获得的收益 (BTC)
+     *
+     * @param dailyIncome    每日收益（BTC）
+     * @param electricityFee 电费是负数单位BTC
+     * @param isReturn       是否回本后
+     * @return 收益（BTC）
      */
-    public BigDecimal calIncome(BigDecimal computePower, BigDecimal dailyYieldPerTStr, BigDecimal electricityFee) {
+    public IncomeInfo calUserIncome(BigDecimal dailyIncome, BigDecimal electricityFee, Boolean isReturn) {
+        BigDecimal profit = dailyIncome.add(electricityFee);
 
-        if (share != null && computePower != null && dailyYieldPerTStr != null) {
-            // 计算每日收益
-            BigDecimal dailyIncome = computePower.multiply(dailyYieldPerTStr);
-            // 扣除电费后的收益
-            BigDecimal netIncome = dailyIncome.add(electricityFee);
-            if (netIncome.compareTo(BigDecimal.ZERO) <= 0) {
-                return BigDecimal.ZERO;
-            }
-            // 按照分成比例计算用户收益
-            BigDecimal userIncome = netIncome.multiply(share);
-            return userIncome.setScale(8, RoundingMode.DOWN);
+        BigDecimal commission = calCommission(profit, isReturn);
+
+        BigDecimal userIncome = dailyIncome.subtract(commission);
+
+        return new IncomeInfo(userIncome,commission,dailyIncome);
+    }
+
+    /**
+     * 计算平台抽成 (BTC)
+     *
+     * @param profit   利润（BTC）
+     * @param isReturn 是否回本
+     * @return 平台抽成（BTC）
+     */
+    public BigDecimal calCommission(BigDecimal profit, Boolean isReturn) {
+        if (profit == null || profit.compareTo(BigDecimal.ZERO) <= 0) {
+            return BigDecimal.ZERO;
         }
 
+        if (share != null) {
+            return profit.multiply(share);
+        }
 
-        return null;
+        if (postShare != null && isReturn) {
+            return profit.multiply(postShare);
+        }
+        return BigDecimal.ZERO;
     }
 }

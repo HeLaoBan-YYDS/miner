@@ -2,14 +2,13 @@ package com.ruoyi.task;
 
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONUtil;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.enums.*;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.BtcPriceUtil;
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.system.domain.BizLog;
-import com.ruoyi.system.domain.BizOrder;
-import com.ruoyi.system.domain.BizProject;
-import com.ruoyi.system.domain.ShareConfig;
+import com.ruoyi.system.domain.*;
 import com.ruoyi.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
@@ -54,6 +53,9 @@ public class SendIncomeTask {
     @Autowired
     private ISysUserService sysUserService;
 
+    @Autowired
+    private BtcPriceUtil btcPriceUtil;
+
 
     private Map<Long, BizProject> projectMap = new HashMap<>();
 
@@ -64,6 +66,7 @@ public class SendIncomeTask {
 
    //单位电价
    private BigDecimal powerFee = null;
+
 
 
     public void sendIncome() {
@@ -181,7 +184,7 @@ public class SendIncomeTask {
         savePowerFeeLog(bizOrder, electricityFee);
 
         //发放收益
-        BigDecimal income = sendIncome(bizOrder,electricityFee);
+        IncomeInfo income = sendIncome(bizOrder,electricityFee);
 
         //记录奖励日志
         saveIncomeLog(bizOrder, income);
@@ -202,7 +205,8 @@ public class SendIncomeTask {
         bizLogService.insertBizLog(powerFeeLog);
     }
 
-    private void saveIncomeLog(BizOrder bizOrder, BigDecimal income) {
+    private void saveIncomeLog(BizOrder bizOrder, IncomeInfo incomeInfo) {
+        BigDecimal income = incomeInfo.getUserIncome();
         SysUser user = sysUserService.selectUserById(bizOrder.getUserId());
         BigDecimal beforeAmount = user.getAccount().subtract(income);
         if (BigDecimal.ZERO.compareTo(beforeAmount) > 0){
@@ -217,10 +221,11 @@ public class SendIncomeTask {
         bizLog.setCreateTime(new Date());
         bizLog.setBeforeAmount(beforeAmount);
         bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
+        bizLog.setRemark(JSONUtil.toJsonStr(incomeInfo));
         bizLogService.insertBizLog(bizLog);
     }
 
-    private BigDecimal sendIncome(BizOrder bizOrder, BigDecimal electricityFee) {
+    private IncomeInfo sendIncome(BizOrder bizOrder, BigDecimal electricityFee) {
         if (bizOrder.getShareModeId() == null) {
             String msg = String.format("订单分红模式未设置，订单号:%s", bizOrder.getOrderId());
             throw new ServiceException(msg);
@@ -232,18 +237,35 @@ public class SendIncomeTask {
             throw new ServiceException(msg);
         }
 
-//        BigDecimal income = shareConfig.calIncome(bizOrder.getComputePower(), dailyYieldPerTStr,electricityFee);
+        //用户收益
+        BigDecimal dailyIncome = dailyYieldPerTStr.multiply(bizOrder.getComputePower());
+        //用户成本
+        Boolean isReturn = isReturn(bizOrder);
+
+        IncomeInfo incomeInfo = shareConfig.calUserIncome(dailyIncome,btcPriceUtil.usdtToBtc(electricityFee),isReturn);
 
         Long userId = bizOrder.getUserId();
-        BigDecimal dailyYieldPerT = dailyYieldPerTStr;
-        BigDecimal income = dailyYieldPerT.multiply(bizOrder.getComputePower());
+
         try {
-            userService.updateAccount(userId,income, CoinType.BTC);
+            userService.updateAccount(userId,incomeInfo.getUserIncome(), CoinType.BTC);
         } catch (Exception e) {
-            String msg = String.format("发放收益失败,订单号:%s,用户ID:%s,收益:%s", bizOrder.getOrderId(), userId, income);
+            String msg = String.format("发放收益失败,订单号:%s,用户ID:%s,收益:%s", bizOrder.getOrderId(), userId, incomeInfo);
             throw new ServiceException(msg);
         }
-        return income;
+        return incomeInfo;
+    }
+
+    /**
+     * 用户是否回本
+     * @param bizOrder
+     * @return
+     */
+    private boolean isReturn(BizOrder bizOrder) {
+        BigDecimal paymentAmount = bizOrder.getPaymentAmount();
+
+        BigDecimal totalIncome = orderService.getTotalIncome(bizOrder.getUserId());
+
+        return totalIncome.compareTo(paymentAmount) > 0;
     }
 
     private BigDecimal deductElectricityFee(BizOrder bizOrder) {
