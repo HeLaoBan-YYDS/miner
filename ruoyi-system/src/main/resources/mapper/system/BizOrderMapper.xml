@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BizOrderMapper">
+
+	<resultMap type="BizOrder" id="BizOrderResult">
+		<result property="orderId"    column="order_id"    />
+		<result property="userId"    column="user_id"    />
+		<result property="projectId"    column="project_id"    />
+		<result property="projectName"    column="project_name"    />
+		<result property="computePower"    column="compute_power"    />
+		<result property="unitPrice"    column="unit_price"    />
+		<result property="paymentAmount"    column="payment_amount"    />
+		<result property="status"    column="status"    />
+		<result property="waitingPeriod"    column="waiting_period"    />
+		<result property="incomeCycle"    column="income_cycle"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="remark"    column="remark"    />
+		<result property="delFlag"    column="del_flag"    />
+		<result property="createBy"    column="create_by"    />
+		<result property="updateBy"    column="update_by"    />
+		<result property="shareModeId" column="share_mode_id" />
+	</resultMap>
+
+	<sql id="selectBizOrderVo">
+		select order_id, user_id, project_id, project_name, compute_power, unit_price, payment_amount, status, waiting_period, income_cycle, create_time, update_time, remark, del_flag, create_by, update_by,share_mode_id from biz_order
+	</sql>
+
+	<select id="selectBizOrderList" parameterType="BizOrder" resultMap="BizOrderResult">
+		<include refid="selectBizOrderVo"/>
+		<where>
+			<if test="userId != null "> and user_id = #{userId}</if>
+			<if test="projectId != null "> and project_id = #{projectId}</if>
+			<if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+			<if test="computePower != null "> and compute_power = #{computePower}</if>
+			<if test="unitPrice != null "> and unit_price = #{unitPrice}</if>
+			<if test="paymentAmount != null "> and payment_amount = #{paymentAmount}</if>
+			<if test="status != null  and status != ''"> and status = #{status}</if>
+			<if test="waitingPeriod != null "> and waiting_period = #{waitingPeriod}</if>
+			<if test="incomeCycle != null "> and income_cycle = #{incomeCycle}</if>
+			<if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+		</where>
+	</select>
+
+	<select id="selectBizOrderByOrderId" parameterType="Long" resultMap="BizOrderResult">
+		<include refid="selectBizOrderVo"/>
+		where order_id = #{orderId}
+	</select>
+
+	<insert id="insertBizOrder" parameterType="BizOrder" useGeneratedKeys="true" keyProperty="orderId">
+		insert into biz_order
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="orderId != null">order_id,</if>
+			<if test="userId != null">user_id,</if>
+			<if test="projectId != null">project_id,</if>
+			<if test="projectName != null and projectName != ''">project_name,</if>
+			<if test="computePower != null">compute_power,</if>
+			<if test="unitPrice != null">unit_price,</if>
+			<if test="paymentAmount != null">payment_amount,</if>
+			<if test="status != null and status != ''">status,</if>
+			<if test="waitingPeriod != null">waiting_period,</if>
+			<if test="incomeCycle != null">income_cycle,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="updateTime != null">update_time,</if>
+			<if test="remark != null">remark,</if>
+			<if test="delFlag != null">del_flag,</if>
+			<if test="createBy != null">create_by,</if>
+			<if test="updateBy != null">update_by,</if>
+		    <if test="shareModeId != null">share_mode_id,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+		    <if test="orderId != null">#{orderId},</if>
+			<if test="userId != null">#{userId},</if>
+			<if test="projectId != null">#{projectId},</if>
+			<if test="projectName != null and projectName != ''">#{projectName},</if>
+			<if test="computePower != null">#{computePower},</if>
+			<if test="unitPrice != null">#{unitPrice},</if>
+			<if test="paymentAmount != null">#{paymentAmount},</if>
+			<if test="status != null and status != ''">#{status},</if>
+			<if test="waitingPeriod != null">#{waitingPeriod},</if>
+			<if test="incomeCycle != null">#{incomeCycle},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="updateTime != null">#{updateTime},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="delFlag != null">#{delFlag},</if>
+			<if test="createBy != null">#{createBy},</if>
+			<if test="updateBy != null">#{updateBy},</if>
+			<if test="shareModeId != null">#{shareModeId},</if>
+		</trim>
+	</insert>
+
+	<update id="updateBizOrder" parameterType="BizOrder">
+		update biz_order
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="userId != null">user_id = #{userId},</if>
+			<if test="projectId != null">project_id = #{projectId},</if>
+			<if test="projectName != null and projectName != ''">project_name = #{projectName},</if>
+			<if test="computePower != null">compute_power = #{computePower},</if>
+			<if test="unitPrice != null">unit_price = #{unitPrice},</if>
+			<if test="paymentAmount != null">payment_amount = #{paymentAmount},</if>
+			<if test="status != null and status != ''">status = #{status},</if>
+			<if test="waitingPeriod != null">waiting_period = #{waitingPeriod},</if>
+			<if test="incomeCycle != null">income_cycle = #{incomeCycle},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="remark != null">remark = #{remark},</if>
+			<if test="delFlag != null">del_flag = #{delFlag},</if>
+			<if test="createBy != null">create_by = #{createBy},</if>
+			<if test="updateBy != null">update_by = #{updateBy},</if>
+			<if test="shareModeId != null">share_mode_id = #{shareModeId},</if>
+		</trim>
+		where order_id = #{orderId}
+	</update>
+
+	<delete id="deleteBizOrderByOrderId" parameterType="Long">
+		delete from biz_order where order_id = #{orderId}
+	</delete>
+
+	<delete id="deleteBizOrderByOrderIds" parameterType="String">
+		delete from biz_order where order_id in
+		<foreach item="orderId" collection="array" open="(" separator="," close=")">
+			#{orderId}
+		</foreach>
+	</delete>
+</mapper>

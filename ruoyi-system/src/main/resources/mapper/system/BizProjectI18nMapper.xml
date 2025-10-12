@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BizProjectI18nMapper">
+
+    <resultMap type="BizProjectI18n" id="BizProjectI18nResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="langCode"    column="lang_code"    />
+        <result property="intro"    column="intro"    />
+        <result property="description"    column="description"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectBizProjectI18nVo">
+        select id, project_id, lang_code, intro, description, create_by, create_time, update_by, update_time from biz_project_i18n
+    </sql>
+
+    <select id="selectBizProjectI18nList" parameterType="BizProjectI18n" resultMap="BizProjectI18nResult">
+        <include refid="selectBizProjectI18nVo"/>
+        <where>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="langCode != null  and langCode != ''"> and lang_code = #{langCode}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+        </where>
+    </select>
+
+    <select id="selectBizProjectI18nById" parameterType="Long" resultMap="BizProjectI18nResult">
+        <include refid="selectBizProjectI18nVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBizProjectI18n" parameterType="BizProjectI18n" useGeneratedKeys="true" keyProperty="id">
+        insert into biz_project_i18n
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="langCode != null and langCode != ''">lang_code,</if>
+            <if test="intro != null">intro,</if>
+            <if test="description != null">description,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="langCode != null and langCode != ''">#{langCode},</if>
+            <if test="intro != null">#{intro},</if>
+            <if test="description != null">#{description},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateBizProjectI18n" parameterType="BizProjectI18n">
+        update biz_project_i18n
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="langCode != null and langCode != ''">lang_code = #{langCode},</if>
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBizProjectI18nById" parameterType="Long">
+        delete from biz_project_i18n where id = #{id}
+    </delete>
+
+    <delete id="deleteBizProjectI18nByIds" parameterType="String">
+        delete from biz_project_i18n where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

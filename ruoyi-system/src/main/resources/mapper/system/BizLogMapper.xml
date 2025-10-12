@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BizLogMapper">
+
+	<resultMap type="BizLog" id="BizLogResult">
+		<result property="logId"    column="log_id"    />
+		<result property="userId"    column="user_id"    />
+		<result property="fromUserId"    column="from_user_id"    />
+		<result property="toUserId"    column="to_user_id"    />
+		<result property="amount"    column="amount"    />
+		<result property="coinType"    column="coin_type"    />
+		<result property="beforeAmount"    column="before_amount"    />
+		<result property="orderNo"    column="order_no"    />
+		<result property="logType"    column="log_type"    />
+		<result property="logStatus"    column="log_status"    />
+		<result property="remark"    column="remark"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="address"    column="address"    />
+	</resultMap>
+
+	<sql id="selectBizLogVo">
+		select log_id, user_id, from_user_id, to_user_id, amount, coin_type, before_amount, order_no, log_type, log_status, remark, create_time, address from biz_log
+	</sql>
+
+	<select id="selectBizLogList" parameterType="BizLog" resultMap="BizLogResult">
+		<include refid="selectBizLogVo"/>
+		<where>
+			<if test="userId != null "> and user_id = #{userId}</if>
+			<if test="fromUserId != null "> and from_user_id = #{fromUserId}</if>
+			<if test="toUserId != null "> and to_user_id = #{toUserId}</if>
+			<if test="amount != null "> and amount = #{amount}</if>
+			<if test="coinType != null  and coinType != ''"> and coin_type = #{coinType}</if>
+			<if test="beforeAmount != null "> and before_amount = #{beforeAmount}</if>
+			<if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+			<if test="logType != null  and logType != ''"> and log_type = #{logType}</if>
+			<if test="logStatus != null  and logStatus != ''"> and log_status = #{logStatus}</if>
+			<if test="createTime != null "> and create_time = #{createTime}</if>
+			<if test="address != null  and address != ''"> and address = #{address}</if>
+			<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+				AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+			</if>
+			<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+				AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+			</if>
+		</where>
+		order by create_time desc
+	</select>
+
+	<select id="selectBizLogByLogId" parameterType="Long" resultMap="BizLogResult">
+		<include refid="selectBizLogVo"/>
+		where log_id = #{logId}
+	</select>
+
+	<select id="selectBizLogByOrderNo" resultType="com.ruoyi.system.domain.BizLog">
+		<include refid="selectBizLogVo"/>
+		where order_no = #{orderNo}
+	</select>
+
+	<insert id="insertBizLog" parameterType="BizLog" useGeneratedKeys="true" keyProperty="logId">
+		insert into biz_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null">user_id,</if>
+			<if test="fromUserId != null">from_user_id,</if>
+			<if test="toUserId != null">to_user_id,</if>
+			<if test="amount != null">amount,</if>
+			<if test="coinType != null">coin_type,</if>
+			<if test="beforeAmount != null">before_amount,</if>
+			<if test="orderNo != null">order_no,</if>
+			<if test="logType != null">log_type,</if>
+			<if test="logStatus != null">log_status,</if>
+			<if test="remark != null">remark,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="address != null">address,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null">#{userId},</if>
+			<if test="fromUserId != null">#{fromUserId},</if>
+			<if test="toUserId != null">#{toUserId},</if>
+			<if test="amount != null">#{amount},</if>
+			<if test="coinType != null">#{coinType},</if>
+			<if test="beforeAmount != null">#{beforeAmount},</if>
+			<if test="orderNo != null">#{orderNo},</if>
+			<if test="logType != null">#{logType},</if>
+			<if test="logStatus != null">#{logStatus},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="address != null">#{address},</if>
+		</trim>
+	</insert>
+
+	<update id="updateBizLog" parameterType="BizLog">
+		update biz_log
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="userId != null">user_id = #{userId},</if>
+			<if test="fromUserId != null">from_user_id = #{fromUserId},</if>
+			<if test="toUserId != null">to_user_id = #{toUserId},</if>
+			<if test="amount != null">amount = #{amount},</if>
+			<if test="coinType != null">coin_type = #{coinType},</if>
+			<if test="beforeAmount != null">before_amount = #{beforeAmount},</if>
+			<if test="orderNo != null">order_no = #{orderNo},</if>
+			<if test="logType != null">log_type = #{logType},</if>
+			<if test="logStatus != null">log_status = #{logStatus},</if>
+			<if test="remark != null">remark = #{remark},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="address != null">address = #{address},</if>
+		</trim>
+		where log_id = #{logId}
+	</update>
+
+	<delete id="deleteBizLogByLogId" parameterType="Long">
+		delete from biz_log where log_id = #{logId}
+	</delete>
+
+	<delete id="deleteBizLogByLogIds" parameterType="String">
+		delete from biz_log where log_id in
+		<foreach item="logId" collection="array" open="(" separator="," close=")">
+			#{logId}
+		</foreach>
+	</delete>
+</mapper>
