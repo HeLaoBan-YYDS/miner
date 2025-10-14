@@ -14,7 +14,7 @@ public class BtcPriceUtil {
 
     private static final String BINANCE_API = "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT";
     private static final String REDIS_KEY = "BTC_USDT_PRICE";
-    private static final Integer CACHE_SECONDS = 600;
+    private static final Integer CACHE_SECONDS = 5;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -32,7 +32,7 @@ public class BtcPriceUtil {
         try {
             String result = restTemplate.getForObject(BINANCE_API, String.class);
             String price = result.split("\"price\":\"")[1].split("\"")[0];
-            redisCache.setCacheObject(REDIS_KEY, price, CACHE_SECONDS, TimeUnit.SECONDS);
+            redisCache.setCacheObject(REDIS_KEY, price, CACHE_SECONDS, TimeUnit.MINUTES);
             return new BigDecimal(price);
         } catch (Exception e) {
             return BigDecimal.ZERO;

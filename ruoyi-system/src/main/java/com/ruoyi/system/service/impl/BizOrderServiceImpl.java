@@ -18,6 +18,7 @@ import com.ruoyi.common.enums.CoinType;
 import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
 import com.ruoyi.common.enums.OrderStatusEnum;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.MessageUtils;
@@ -161,7 +162,7 @@ public class BizOrderServiceImpl implements IBizOrderService
         try {
             sysUserService.updateAccount(placeDTO.getUserId(), paymentAmount, CoinType.USDT);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ServiceException(e.getMessage());
         }
 
         //生成订单

@@ -3,6 +3,8 @@ package com.ruoyi.framework.interceptor;
 import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.utils.MessageUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -31,7 +33,13 @@ public abstract class RepeatSubmitInterceptor implements HandlerInterceptor
             {
                 if (this.isRepeatSubmit(request, annotation))
                 {
-                    AjaxResult ajaxResult = AjaxResult.error(annotation.message());
+                    String message = null;
+                    try {
+                        message = MessageUtils.message(annotation.message());
+                    } catch (Exception e) {
+                        message = "Please do not submit repeatedly";
+                    }
+                    AjaxResult ajaxResult = AjaxResult.error(message);
                     ServletUtils.renderString(response, JSON.toJSONString(ajaxResult));
                     return false;
                 }

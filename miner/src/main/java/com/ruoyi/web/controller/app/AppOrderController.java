@@ -52,7 +52,7 @@ public class AppOrderController extends BaseController {
     @PreAuthorize("@ss.hasRole('user')")
     @Log(title = "下单", businessType = BusinessType.UPDATE)
     @ApiOperation("下单")
-    @RepeatSubmit
+    @RepeatSubmit(message = "repeat.submit.message")
     public AjaxResult place(@RequestBody @Valid PlaceDTO placeDTO) {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         Assert.notNull(loginUser, MessageUtils.message("user.notfound"));

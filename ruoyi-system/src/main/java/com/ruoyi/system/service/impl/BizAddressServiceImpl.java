@@ -219,8 +219,8 @@ public class BizAddressServiceImpl implements IBizAddressService {
         noUsebizAddress.setCoinType(coinType);
         noUsebizAddress.setUseFlag("0");
         if (!CollectionUtils.isEmpty(addresses)) {
-            addresses.forEach(a -> {
-                noUsebizAddress.setAddress(address);
+            addresses.forEach(addressNew -> {
+                noUsebizAddress.setAddress(addressNew);
                 bizAddressMapper.insertBizAddress(noUsebizAddress);
             });
         }
@@ -237,32 +237,27 @@ public class BizAddressServiceImpl implements IBizAddressService {
         try {
             boolean flag = new SignUtil().verifySign(resEle.get("data"), resEle.get("sign").getAsString(), pubKey);
             log.info("充值回调验签:{}", flag);
+            Gson gson = new GsonBuilder().create();
             if (flag) {
                 data.put("success_data", "success");
-                Gson gson = new GsonBuilder().create();
                 params.put("sign", new SignUtil().genSign(params, ownerPriKey));
                 params.put("data", data);
                 params.put("status", 200);
                 BizCallReq bizCallReq = JSON.toJavaObject(res, BizCallReq.class);
                 this.insertInfoAndUpdateAccount(bizCallReq);
-                return gson.toJson(params);
             } else {
                 data.put("success_data", "fail");
                 params.put("sign", new SignUtil().genSign(params, ownerPriKey));
-                Gson gson = new GsonBuilder().create();
                 params.put("data", data);
                 params.put("status", -200);
-                return gson.toJson(params);
             }
+            String response = gson.toJson(params);
+            saveSuccessLog(res,response);
+            return response;
         } catch (Exception e) {
             log.error("充值回调异常", e);
             saveErrorLog(res, e);
-            data.put("success_data", "fail");
-            params.put("sign", new SignUtil().genSign(params, ownerPriKey));
-            Gson gson = new GsonBuilder().create();
-            params.put("data", data);
-            params.put("status", -200);
-            return gson.toJson(params);
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -414,6 +409,18 @@ public class BizAddressServiceImpl implements IBizAddressService {
         sysOperLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
         operLogService.insertOperlog(sysOperLog);
     }
+
+
+
+    private void saveSuccessLog(String res, String req) {
+        SysOperLog sysOperLog = new SysOperLog();
+        sysOperLog.setTitle("充值回调成功");
+        sysOperLog.setOperParam(res);
+        sysOperLog.setJsonResult("充值回调结果"+req);
+        sysOperLog.setStatus(0);
+        operLogService.insertOperlog(sysOperLog);
+    }
+
 
 
     /**
