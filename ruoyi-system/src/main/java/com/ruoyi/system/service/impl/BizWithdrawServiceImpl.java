@@ -130,14 +130,10 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
 
             return gson.toJson(params);
         } catch (Exception e) {
-            data.put("success_data", "fail");
-            params.put("data", data);
-            params.put("status", -200);
-            params.put("sign", new SignUtil().genSign(params, ownerPriKey));
-            Gson gson = new GsonBuilder().create();
+            log.error("提现回调失败:", e);
             sysOperLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
             sysOperLog.setStatus(1);
-            return gson.toJson(params);
+            throw new ServiceException(e.getMessage());
         } finally {
             operLogService.insertOperlog(sysOperLog);
         }

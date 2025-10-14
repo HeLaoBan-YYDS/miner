@@ -17,7 +17,7 @@ public class PlaceDTO implements Serializable {
 
     private Long projectId;
 
-    @DecimalMin(value = "0.01", message = "{place.computePower.min}")
+    @DecimalMin(value = "1")
     private BigDecimal computePower;
 
     private Long userId;
