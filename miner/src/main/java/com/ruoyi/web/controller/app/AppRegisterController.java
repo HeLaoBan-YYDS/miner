@@ -67,12 +67,12 @@ public class AppRegisterController extends BaseController {
         try {
             email = SignUtil.decrypt(sign, ownerPriKey);
         } catch (Exception e) {
-            return error("解密失败");
+            return error("解密失败-非法攻击");
         }
 
         boolean validEmail = EmailValidator.isValidEmail(email);
         if (!validEmail) {
-            return error("邮箱格式不正确");
+            return error(MessageUtils.message("user.email.not.valid"));
         }
 
         //生成验证码
@@ -83,7 +83,7 @@ public class AppRegisterController extends BaseController {
             redisCache.setCacheObject(redisKey, validCode, 5, TimeUnit.MINUTES);
             return AjaxResult.success();
         } else {
-            return error("邮件发送失败");
+            return error(MessageUtils.message("mail.send.fail"));
         }
     }
 

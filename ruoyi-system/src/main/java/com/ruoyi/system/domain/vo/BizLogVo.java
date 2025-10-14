@@ -21,4 +21,6 @@ public class BizLogVo {
     private Date createTime;
 
     private BigDecimal incomeAmount;
+
+    private String orderId;
 }
