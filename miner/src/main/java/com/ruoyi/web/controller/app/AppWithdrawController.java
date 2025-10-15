@@ -10,6 +10,7 @@ import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.dto.WithdrawDTO;
 import com.ruoyi.system.service.IBizWithdrawService;
+import com.ruoyi.system.service.ISysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,20 @@ public class AppWithdrawController {
     @Autowired
     private IBizWithdrawService withdrawService;
 
+    @Autowired
+    private ISysConfigService configService;
+
     @PostMapping("/callback")
     @Anonymous
     public String transferCallback(@RequestBody String data) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         return withdrawService.withdrawCallback(data);
+    }
+
+    @GetMapping("/fee")
+    @Anonymous
+    public AjaxResult withdrawFee(String  coin) {
+        String value = configService.selectConfigByKey(coin);
+        return AjaxResult.success(value);
     }
 
 

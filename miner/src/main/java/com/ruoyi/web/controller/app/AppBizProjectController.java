@@ -6,6 +6,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.enums.LogType;
+import com.ruoyi.common.enums.ProjectStatus;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.BizProject;
@@ -51,6 +53,7 @@ public class AppBizProjectController extends BaseController
         startPage();
         String currentLang = MessageUtils.getCurrentLang();
         bizProject.getParams().put("langCode", currentLang);
+        bizProject.setStatus(ProjectStatus.SUCCESS.getCode());
         List<ProjectVo> list = bizProjectService.selectProjectVoList(bizProject);
         return getDataTable(list);
     }
@@ -61,7 +64,7 @@ public class AppBizProjectController extends BaseController
     @GetMapping("/apr")
     @ApiOperation("项目列表")
     @Anonymous
-    public AjaxResult list()
+    public AjaxResult apr()
     {
         //每日单T产出
         String dailyYieldPerT = configService.selectConfigByKey("daily_per_t_yield") == null ? "0" : configService.selectConfigByKey("daily_per_t_yield");

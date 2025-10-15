@@ -59,6 +59,39 @@ public class BizLog extends BaseEntity
     @Excel(name = "入账地址")
     private String address;
 
+    @Excel(name = "手续费")
+    private BigDecimal fee;
+
+    @Excel(name = "电费")
+    private BigDecimal dailyPowerFee;
+
+    @Excel(name = "txId")
+    private String txId;
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
+
+    public BigDecimal getDailyPowerFee() {
+        return dailyPowerFee;
+    }
+
+    public void setDailyPowerFee(BigDecimal dailyPowerFee) {
+        this.dailyPowerFee = dailyPowerFee;
+    }
+
+    public String getTxId() {
+        return txId;
+    }
+
+    public void setTxId(String txId) {
+        this.txId = txId;
+    }
+
     public void setLogId(Long logId)
     {
         this.logId = logId;

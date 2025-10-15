@@ -18,10 +18,14 @@
 		<result property="remark"    column="remark"    />
 		<result property="createTime"    column="create_time"    />
 		<result property="address"    column="address"    />
+		<!-- 新增字段 -->
+		<result property="fee"    column="fee"    />
+		<result property="dailyPowerFee"    column="daily_power_fee"    />
+		<result property="txId"    column="tx_id"    />
 	</resultMap>
 
 	<sql id="selectBizLogVo">
-		select log_id, user_id, from_user_id, to_user_id, amount, coin_type, before_amount, order_no, log_type, log_status, remark, create_time, address from biz_log
+		select log_id, user_id, from_user_id, to_user_id, amount, coin_type, before_amount, order_no, log_type, log_status, remark, create_time, address, fee, daily_power_fee, tx_id from biz_log
 	</sql>
 
 	<select id="selectBizLogList" parameterType="BizLog" resultMap="BizLogResult">
@@ -38,6 +42,10 @@
 			<if test="logStatus != null  and logStatus != ''"> and log_status = #{logStatus}</if>
 			<if test="createTime != null "> and create_time = #{createTime}</if>
 			<if test="address != null  and address != ''"> and address = #{address}</if>
+			<!-- 新增字段条件 -->
+			<if test="fee != null "> and fee = #{fee}</if>
+			<if test="dailyPowerFee != null "> and daily_power_fee = #{dailyPowerFee}</if>
+			<if test="txId != null  and txId != ''"> and tx_id = #{txId}</if>
 			<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
 				AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
 			</if>
@@ -73,6 +81,10 @@
 			<if test="remark != null">remark,</if>
 			<if test="createTime != null">create_time,</if>
 			<if test="address != null">address,</if>
+			<!-- 新增字段 -->
+			<if test="fee != null">fee,</if>
+			<if test="dailyPowerFee != null">daily_power_fee,</if>
+			<if test="txId != null">tx_id,</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="userId != null">#{userId},</if>
@@ -87,6 +99,10 @@
 			<if test="remark != null">#{remark},</if>
 			<if test="createTime != null">#{createTime},</if>
 			<if test="address != null">#{address},</if>
+			<!-- 新增字段 -->
+			<if test="fee != null">#{fee},</if>
+			<if test="dailyPowerFee != null">#{dailyPowerFee},</if>
+			<if test="txId != null">#{txId},</if>
 		</trim>
 	</insert>
 
@@ -105,6 +121,10 @@
 			<if test="remark != null">remark = #{remark},</if>
 			<if test="createTime != null">create_time = #{createTime},</if>
 			<if test="address != null">address = #{address},</if>
+			<!-- 新增字段 -->
+			<if test="fee != null">fee = #{fee},</if>
+			<if test="dailyPowerFee != null">daily_power_fee = #{dailyPowerFee},</if>
+			<if test="txId != null">tx_id = #{txId},</if>
 		</trim>
 		where log_id = #{logId}
 	</update>

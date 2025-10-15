@@ -187,7 +187,7 @@ public class SendIncomeTask {
         IncomeInfo income = sendIncome(bizOrder,electricityFee);
 
         //记录奖励日志
-        saveIncomeLog(bizOrder, income);
+        saveIncomeLog(bizOrder, income,electricityFee);
     }
 
     private void savePowerFeeLog(BizOrder bizOrder, BigDecimal orderPowerFee) {
@@ -205,7 +205,7 @@ public class SendIncomeTask {
         bizLogService.insertBizLog(powerFeeLog);
     }
 
-    private void saveIncomeLog(BizOrder bizOrder, IncomeInfo incomeInfo) {
+    private void saveIncomeLog(BizOrder bizOrder, IncomeInfo incomeInfo, BigDecimal electricityFee) {
         BigDecimal income = incomeInfo.getUserIncome();
         SysUser user = sysUserService.selectUserById(bizOrder.getUserId());
         BigDecimal beforeAmount = user.getAccount().subtract(income);
@@ -222,6 +222,7 @@ public class SendIncomeTask {
         bizLog.setBeforeAmount(beforeAmount);
         bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
         bizLog.setRemark(JSONUtil.toJsonStr(incomeInfo));
+        bizLog.setDailyPowerFee(electricityFee);
         bizLogService.insertBizLog(bizLog);
     }
 

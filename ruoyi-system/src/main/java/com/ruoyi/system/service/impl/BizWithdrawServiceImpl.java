@@ -17,6 +17,7 @@ import com.ruoyi.system.domain.*;
 import com.ruoyi.system.domain.dto.WithdrawDTO;
 import com.ruoyi.system.mapper.BizLogMapper;
 import com.ruoyi.system.service.*;
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,8 +64,12 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
 
     @Value("${external.hotWallet.baseUrl}")
     public String baseUrl;
+
     @Autowired
     private IBizLogService bizLogService;
+
+    @Autowired
+    private ISysConfigService configService;
 
 
     /**
@@ -176,6 +181,11 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
             throw new ServiceException(MessageUtils.message("user.notfound"));
         }
         BigDecimal cashWithdrawalAmount = withdrawalAmount.negate();
+
+        CoinType coinType = CoinType.getByCode(withdrawDTO.getCoin()).orElse(null);
+        if (null == coinType){
+            throw new ServiceException(MessageUtils.message("coinType.unsupported"));
+        }
         try {
             userService.updateAccount(userId, cashWithdrawalAmount,CoinType.getByCode(withdrawDTO.getCoin()).orElse(null));
         } catch (Exception e) {
@@ -193,6 +203,8 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
         bizLog.setOrderNo(tradeNo);
         bizLog.setBeforeAmount(user.getAccount());
         bizLog.setAddress(withdrawDTO.getAddress());
+        BigDecimal fee = new BigDecimal(configService.selectConfigByKey(coinType.getFee()));
+        bizLog.setFee(fee);
         bizLogService.insertBizLog(bizLog);
     }
 
@@ -211,6 +223,8 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
             throw new ServiceException("提现记录不存在");
         }
 
+        String amount = withdrawLog.getAmount().negate().subtract(withdrawLog.getFee()).stripTrailingZeros().toPlainString();
+
         //审核通过 发送提现申请
         Map<String, Object> params = new HashMap<>();
         params.put("app_id", appId);
@@ -220,7 +234,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
         params.put("user_id", withdrawLog.getUserId());
         params.put("coin", CoinType.getCoin(withdrawLog.getCoinType()));
         params.put("address", withdrawLog.getAddress().trim());
-        params.put("amount", withdrawLog.getAmount().negate().stripTrailingZeros().toPlainString());
+        params.put("amount", amount);
         params.put("trade_id", withdrawLog.getOrderNo());
         try {
             params.put("sign", new SignUtil().genSign(params, ownerPriKey));
@@ -243,6 +257,7 @@ public class BizWithdrawServiceImpl implements IBizWithdrawService {
                 throw new ServiceException("提现审核API返回数据异常:"+resEle);
             }
             withdrawLog.setLogStatus(LogStatus.SUCCESS.getCode());
+            withdrawLog.setTxId(resEle.get("tx_id").getAsString());
             bizLogMapper.updateBizLog(withdrawLog);
         }catch (Exception e) {
             throw new ServiceException("提现审核失败:" + e.getMessage());

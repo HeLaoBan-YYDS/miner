@@ -23,4 +23,6 @@ public class BizLogVo {
     private BigDecimal incomeAmount;
 
     private String orderId;
+
+    private BigDecimal dailyPowerFee;
 }

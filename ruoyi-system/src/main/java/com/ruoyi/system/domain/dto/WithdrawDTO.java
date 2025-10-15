@@ -16,11 +16,11 @@ public class WithdrawDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @DecimalMin(value = "0.01", message = "{amount.min}")
+    @DecimalMin(value = "0.01", message = "Amount must be at least 0.01")
     private BigDecimal amount;
 
 
-    @NotBlank(message = "{address.notblank}")
+    @NotBlank(message = "Address cannot be empty")
     private String address;
 
     /**

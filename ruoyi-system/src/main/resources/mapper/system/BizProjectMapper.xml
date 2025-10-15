@@ -93,6 +93,7 @@
 			<if test="waitingPeriod != null "> and p.waiting_period = #{waitingPeriod}</if>
 			<if test="incomeCycle != null "> and p.income_cycle = #{incomeCycle}</if>
 			<if test="status != null  and status != ''"> and p.status = #{status}</if>
+			 and del_flag = '0'
 		</where>
 	</select>
 

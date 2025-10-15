@@ -592,7 +592,7 @@ public class SysUserServiceImpl implements ISysUserService
                 break;
             default:
                 // 处理未知币种
-                throw new Exception("coinType.unsupported");
+                throw new Exception(MessageUtils.message("coinType.unsupported"));
         }
 
 

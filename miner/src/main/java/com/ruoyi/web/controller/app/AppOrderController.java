@@ -114,6 +114,7 @@ public class AppOrderController extends BaseController {
             bizLogVo.setOrderComputePower(order.getComputePower());
             bizLogVo.setIncomeAmount(log.getAmount());
             bizLogVo.setOrderId(log.getOrderNo());
+            bizLogVo.setDailyPowerFee(log.getDailyPowerFee());
             bizLogVoList.add(bizLogVo);
         }
 

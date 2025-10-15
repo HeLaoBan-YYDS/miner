@@ -18,8 +18,8 @@ import java.util.Optional;
  */
 @Getter
 public enum ProjectStatus {
-    SUCCESS("0", "启用" ),
-    FAILED("1", "停用");
+    SUCCESS("0", "上架" ),
+    FAILED("1", "下架");
 
     /**
      * 数据库存储值

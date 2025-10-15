@@ -34,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +132,7 @@ public class AppUserController extends BaseController {
         UserInfoVo userInfoVo = new UserInfoVo();
         userInfoVo.setDailyYieldPerT(dailyYieldPerT);
         userInfoVo.setMyTotalComputePower(myTotalComputePower);
-        userInfoVo.setUsdtAccount(sysUser.getAccount());
+        userInfoVo.setUsdtAccount(sysUser.getAccount().setScale(3, RoundingMode.DOWN));
         userInfoVo.setBtcAccount(sysUser.getBtcAccount());
         userInfoVo.setDailyPowerFee(dailyPowerFee);
         userInfoVo.setPlatformTotalComputePower(platformTotalComputePower);

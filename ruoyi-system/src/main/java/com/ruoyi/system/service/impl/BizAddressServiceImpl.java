@@ -398,6 +398,7 @@ public class BizAddressServiceImpl implements IBizAddressService {
         bizLog.setCoinType(CoinType.USDT.getCode());
         bizLog.setLogType(LogType.RECHARGE.getCode());
         bizLog.setLogStatus(LogStatus.SUCCESS.getCode());
+        bizLog.setTxId(data.getTxid());
         bizLogService.insertBizLog(bizLog);
     }
 

@@ -11,8 +11,8 @@ import java.util.Optional;
  */
 @Getter
 public enum CoinType {
-    USDT("usdt", "usdt_trc20", "泰达币", 6),
-    BTC("btc", "btc", "比特币", 6);
+    USDT("usdt", "usdt_trc20", "泰达币", 8,"usdt_fee"),
+    BTC("btc", "btc", "比特币", 8,"btc_fee");
 
     /**
      * 数据库存储值
@@ -34,11 +34,14 @@ public enum CoinType {
      */
     private final int defaultScale;
 
-    CoinType(String code, String coin, String description, int defaultScale) {
+    private final String fee;
+
+    CoinType(String code, String coin, String description, int defaultScale, String fee) {
         this.code = code;
         this.coin = coin;
         this.description = description;
         this.defaultScale = defaultScale;
+        this.fee = fee;
     }
 
     /**
