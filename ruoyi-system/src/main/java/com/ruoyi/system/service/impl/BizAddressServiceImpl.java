@@ -361,6 +361,12 @@ public class BizAddressServiceImpl implements IBizAddressService {
      */
     private void insertInfoAndUpdateAccount(BizCallReq bizCallReq) {
         BizCallBackInfo data = bizCallReq.getData();
+        String orderId = data.getOrder_id();
+        BizLog bizLog = bizLogService.selectBizLogByOrderNo(orderId);
+        //重复回调了两次
+        if (bizLog != null) {
+            return;
+        }
         BizAddress bizAddress = new BizAddress();
         bizAddress.setAddress(data.getAddress());
         List<BizAddress> bizAddresses = bizAddressMapper.selectBizAddressList(bizAddress);
