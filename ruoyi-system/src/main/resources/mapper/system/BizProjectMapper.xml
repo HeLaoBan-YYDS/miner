@@ -74,6 +74,7 @@
 			<if test="waitingPeriod != null "> and waiting_period = #{waitingPeriod}</if>
 			<if test="incomeCycle != null "> and income_cycle = #{incomeCycle}</if>
 			<if test="status != null  and status != ''"> and status = #{status}</if>
+			and del_flag = '0'
 		</where>
 	</select>
 
