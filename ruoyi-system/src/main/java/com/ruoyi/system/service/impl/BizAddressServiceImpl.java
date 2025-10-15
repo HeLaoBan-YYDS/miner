@@ -362,9 +362,9 @@ public class BizAddressServiceImpl implements IBizAddressService {
     private void insertInfoAndUpdateAccount(BizCallReq bizCallReq) {
         BizCallBackInfo data = bizCallReq.getData();
         String orderId = data.getOrder_id();
-        BizLog bizLog = bizLogService.selectBizLogByOrderNo(orderId);
+        BizLog oldLog = bizLogService.selectBizLogByOrderNo(orderId);
         //重复回调了两次
-        if (bizLog != null) {
+        if (oldLog != null) {
             return;
         }
         BizAddress bizAddress = new BizAddress();
