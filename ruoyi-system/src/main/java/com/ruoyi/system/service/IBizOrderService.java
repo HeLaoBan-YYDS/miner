@@ -82,6 +82,8 @@ public interface IBizOrderService
      */
     public BigDecimal getTotalIncome(Long userId);
 
+    BigDecimal getIncomeByOrderId(String orderId);
+
     /**
      * 获取分红模式
      * @return 分红模式

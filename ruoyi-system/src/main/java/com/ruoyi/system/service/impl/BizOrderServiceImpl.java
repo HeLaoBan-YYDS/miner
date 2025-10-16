@@ -229,6 +229,31 @@ public class BizOrderServiceImpl implements IBizOrderService
         return income;
     }
 
+    @Override
+    public BigDecimal getIncomeByOrderId(String orderId) {
+        String redisKey = "ORDER_INCOME_" + orderId;
+        String tIncome = redisCache.getCacheObject(redisKey);
+        if (tIncome != null) {
+            return new BigDecimal(tIncome);
+        }
+        BigDecimal income = calIncomeByOrderNo(orderId);
+        tIncome = income.toString();
+        redisCache.setCacheObject(redisKey,tIncome,5, TimeUnit.MINUTES);
+        return income;
+    }
+
+    private BigDecimal calIncomeByOrderNo(String orderNo) {
+        BizLog bizLog = new BizLog();
+        bizLog.setLogType(LogType.INCOME.getCode());
+        bizLog.setOrderNo(orderNo);
+        List<BizLog> bizLogs = bizLogMapper.selectBizLogList(bizLog);
+        if (CollUtil.isEmpty(bizLogs)) {
+            return BigDecimal.ZERO;
+        }
+        return bizLogs.stream().map(BizLog::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+
     private BigDecimal getIncomeByRange(Long userId, Date yesterdayStart, Date yesterdayEnd) {
         BizLog bizLog = new BizLog();
         bizLog.setLogType(LogType.INCOME.getCode());

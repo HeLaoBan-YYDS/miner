@@ -264,9 +264,11 @@ public class SendIncomeTask {
     private boolean isReturn(BizOrder bizOrder) {
         BigDecimal paymentAmount = bizOrder.getPaymentAmount();
 
-        BigDecimal totalIncome = orderService.getTotalIncome(bizOrder.getUserId());
+        BigDecimal orderTotalIncomeBTC = orderService.getIncomeByOrderId(bizOrder.getOrderId());
 
-        return totalIncome.compareTo(paymentAmount) > 0;
+        BigDecimal orderTotalIncomeUSDT = btcPriceUtil.btcToUsdt(orderTotalIncomeBTC);
+
+        return orderTotalIncomeUSDT.compareTo(paymentAmount) > 0;
     }
 
     private BigDecimal deductElectricityFee(BizOrder bizOrder) {

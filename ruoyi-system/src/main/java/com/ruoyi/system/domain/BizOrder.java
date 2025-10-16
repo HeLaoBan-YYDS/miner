@@ -42,7 +42,7 @@ public class BizOrder extends BaseEntity
     private BigDecimal unitPrice;
 
     /** 支付金额(U) */
-    @Excel(name = "支付金额(U)")
+    @Excel(name = "支付金额(USDT)")
     private BigDecimal paymentAmount;
 
     /** 订单状态（paid:已支付, earning:收益中, power_arrears:电费欠费, ended:收益结束） */
