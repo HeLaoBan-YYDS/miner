@@ -54,6 +54,17 @@ public class BizProject extends BaseEntity
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
 
+    /** 排序 */
+    private int sort;
+
+    public int getSort() {
+        return sort;
+    }
+
+    public void setSort(int sort) {
+        this.sort = sort;
+    }
+
     public void setId(Long id)
     {
         this.id = id;
