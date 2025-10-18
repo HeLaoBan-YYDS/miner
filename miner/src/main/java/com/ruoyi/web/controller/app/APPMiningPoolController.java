@@ -143,7 +143,7 @@ public class APPMiningPoolController {
             miningMachineVO.setElectricityRatio(project.getPowerConsumption().divide(project.getComputePower(), 2, RoundingMode.DOWN));
             miningMachineVO.setElectricityRatio(electricityRatio);
             miningMachineVO.setDailyNetProfit(dailyNetProfit);
-            miningMachineVO.setShutdownPrice(electricityFee.divide(outputUSDT,2, RoundingMode.DOWN));
+            miningMachineVO.setShutdownPrice(electricityFee.divide(outputBTC,2, RoundingMode.DOWN));
             miningMachineVOS.add(miningMachineVO);
         }
         AjaxResult success = AjaxResult.success(miningMachineVOS);
