@@ -63,6 +63,7 @@ public class AppGoogleController {
 
     @GetMapping("/oauth/callback")
     @Anonymous
+    @ApiOperation("谷歌登录回调")
     public AjaxResult callback(@RequestParam("code") String code) throws IOException {
         // 1. 交换 access token
         GoogleTokenResponse tokenResponse =

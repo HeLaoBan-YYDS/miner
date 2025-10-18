@@ -43,6 +43,7 @@ public class AppWithdrawController {
 
     @GetMapping("/fee")
     @Anonymous
+    @ApiOperation("获取提现手续费")
     public AjaxResult withdrawFee(String  coin) {
         String value = configService.selectConfigByKey(coin);
         return AjaxResult.success(value);
