@@ -33,7 +33,7 @@ import com.ruoyi.system.service.ISysMenuService;
  * @author ruoyi
  */
 @RestController
-@Api(tags = "登录管理")
+@Api(tags = "APP端登录管理")
 public class SysLoginController
 {
     @Autowired

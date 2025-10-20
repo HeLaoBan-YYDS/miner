@@ -13,6 +13,7 @@ import com.ruoyi.framework.web.service.SysRegisterService;
 import com.ruoyi.system.service.ISysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
  * @author ruoyi
  */
 @RestController
-@Api(tags = "注册管理")
+@Api(tags = "APP注册管理")
 public class AppRegisterController extends BaseController {
     @Autowired
     private SysRegisterService registerService;
@@ -61,7 +62,7 @@ public class AppRegisterController extends BaseController {
     @GetMapping("/app/sendSmsCode")
     @Anonymous
     @ApiOperation("发送邮箱验证码")
-    public AjaxResult sendSmsCode(String sign) {
+    public AjaxResult sendSmsCode(@ApiParam(value = "RSA算法基于邮箱生成的签名",required = true) String sign) {
 
         String email;
         try {

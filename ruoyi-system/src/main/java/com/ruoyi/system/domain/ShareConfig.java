@@ -1,5 +1,7 @@
 package com.ruoyi.system.domain;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.DecimalMin;
@@ -11,6 +13,7 @@ import java.math.BigDecimal;
 @Data
 public class ShareConfig {
 
+    @ApiModelProperty("id")
     private Long id;
 
     /**
@@ -18,6 +21,7 @@ public class ShareConfig {
      * 示例值：0.45
      */
     @DecimalMin(value = "0.00", message = "电费金额不能小于0")
+    @ApiModelProperty("电费金额")
     private BigDecimal electricityFee;
 
     /**
@@ -26,6 +30,7 @@ public class ShareConfig {
      */
     @DecimalMin(value = "0.00", inclusive = false, message = "分成比例必须大于0")
     @DecimalMin(value = "1.00", inclusive = false, message = "分成比例必须小于1")
+    @ApiModelProperty("分成比例")
     private BigDecimal postShare;
 
     /**
@@ -34,6 +39,7 @@ public class ShareConfig {
      */
     @DecimalMin(value = "0.00", inclusive = false, message = "分成比例必须大于0")
     @DecimalMin(value = "1.00", inclusive = false, message = "分成比例必须小于1")
+    @ApiModelProperty("基础分成比例")
     private BigDecimal share;
 
 

@@ -9,6 +9,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.service.IBizAddressService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +22,7 @@ import java.security.spec.InvalidKeySpecException;
 
 @RestController
 @RequestMapping("/app/recharge")
-@Api(tags = "充值管理")
+@Api(tags = "APP端充值管理")
 @Slf4j
 public class AppRechargeController {
 
@@ -38,7 +39,7 @@ public class AppRechargeController {
     @PreAuthorize("@ss.hasRole('user')")
     @GetMapping(value = "/address")
     @ApiOperation("获取充值地址")
-    public AjaxResult getAddress(String coinType)
+    public AjaxResult getAddress(@ApiParam(value = "币种类型(传递:trx)", required = true) String coinType)
     {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null == loginUser || loginUser.getUserId() == null ){

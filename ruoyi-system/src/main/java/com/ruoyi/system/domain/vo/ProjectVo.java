@@ -72,6 +72,27 @@ public class ProjectVo extends BaseEntity
     @ApiModelProperty("项目描述")
     private String description;
 
+    @ApiModelProperty("APR")
+    private BigDecimal apr;
+
+    @ApiModelProperty("预计回本(天)")
+    private BigDecimal returnAmount;
+
+    public BigDecimal getReturnAmount() {
+        return returnAmount;
+    }
+
+    public void setReturnAmount(BigDecimal returnAmount) {
+        this.returnAmount = returnAmount;
+    }
+
+    public BigDecimal getApr() {
+        return apr;
+    }
+
+    public void setApr(BigDecimal apr) {
+        this.apr = apr;
+    }
 
     public String getStartMiningTime() {
         if (waitingPeriod == null || incomeCycle == null){

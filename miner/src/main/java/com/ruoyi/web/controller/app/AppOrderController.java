@@ -6,6 +6,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
@@ -16,11 +17,9 @@ import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizOrder;
-import com.ruoyi.system.domain.BizProject;
 import com.ruoyi.system.domain.ShareConfig;
 import com.ruoyi.system.domain.dto.PlaceDTO;
 import com.ruoyi.system.domain.vo.BizLogVo;
-import com.ruoyi.system.domain.vo.ProjectVo;
 import com.ruoyi.system.service.IBizLogService;
 import com.ruoyi.system.service.IBizOrderService;
 import io.swagger.annotations.Api;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,8 +67,9 @@ public class AppOrderController extends BaseController {
     @GetMapping("/list")
     @ApiOperation("我的订单列表-记得分页参数")
     @Anonymous
-    public TableDataInfo list(BizOrder bizOrder)
+    public TableDataInfo<List<BizOrder>> list()
     {
+        BizOrder bizOrder = new BizOrder();
         startPage();
         bizOrder.setUserId(getUserId());
         List<BizOrder> list = orderService.selectBizOrderList(bizOrder);
@@ -87,8 +86,9 @@ public class AppOrderController extends BaseController {
     @PreAuthorize("@ss.hasRole('user')")
     @GetMapping("income/list")
     @ApiOperation("我的收益列表-记得分页参数")
-    public TableDataInfo list(BizLog bizLog)
+    public TableDataInfo<List<BizLog>> incomeList()
     {
+        BizLog bizLog = new BizLog();
         startPage();
         bizLog.setUserId(getUserId());
         bizLog.setLogType(LogType.INCOME.getCode());
@@ -125,8 +125,8 @@ public class AppOrderController extends BaseController {
     @GetMapping("/mode")
     @ApiOperation("获取分红模式")
     @Anonymous
-    public AjaxResult mode() {
+    public R<List<ShareConfig>> mode() {
         List<ShareConfig> shareConfigs = orderService.selectMode();
-        return success(shareConfigs);
+        return R.ok(shareConfigs);
     }
 }

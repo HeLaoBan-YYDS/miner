@@ -3,6 +3,7 @@ package com.ruoyi.system.domain;
 import java.math.BigDecimal;
 
 import com.ruoyi.common.enums.OrderStatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -19,47 +20,60 @@ public class BizOrder extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 订单ID */
+    @Excel(name = "订单ID")
+    @ApiModelProperty("订单ID")
     private String orderId;
 
     /** 用户ID */
     @Excel(name = "用户ID")
+    @ApiModelProperty("用户ID")
     private Long userId;
 
     /** 项目ID */
     @Excel(name = "项目ID")
+    @ApiModelProperty("项目ID")
     private Long projectId;
 
     /** 项目名称 */
     @Excel(name = "项目名称")
+    @ApiModelProperty("项目名称")
     private String projectName;
 
     /** 订单算力(T) */
     @Excel(name = "订单算力(T)")
+    @ApiModelProperty("订单算力(T)")
     private BigDecimal computePower;
 
     /** 单价(U/T) */
     @Excel(name = "单价(U/T)")
+    @ApiModelProperty("单价(U/T)")
     private BigDecimal unitPrice;
 
     /** 支付金额(U) */
     @Excel(name = "支付金额(USDT)")
+    @ApiModelProperty("支付金额(U)")
     private BigDecimal paymentAmount;
 
     /** 订单状态（paid:已支付, earning:收益中, power_arrears:电费欠费, ended:收益结束） */
     @Excel(name = "订单状态", dictType = "")
+    @ApiModelProperty("订单状态（paid:已支付, earning:收益中, power_arrears:电费欠费, ended:收益结束）")
     private String status;
 
     /** 等待期(天) */
     @Excel(name = "等待期(天)")
+    @ApiModelProperty("等待期(天)")
     private Long waitingPeriod;
 
     /** 收益周期(天) */
     @Excel(name = "收益周期(天)")
+    @ApiModelProperty("收益周期(天)")
     private Long incomeCycle;
 
     /**
      * 分红模式
      */
+    @Excel(name = "分红模式")
+    @ApiModelProperty("分红模式Id")
     private Long shareModeId;
 
     /** 删除标志（0存在 2删除） */

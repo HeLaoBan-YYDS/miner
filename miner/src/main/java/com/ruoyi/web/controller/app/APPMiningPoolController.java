@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.ProjectStatus;
 import com.ruoyi.common.utils.BtcPriceUtil;
@@ -11,12 +12,12 @@ import com.ruoyi.common.utils.HttpUtil;
 import com.ruoyi.system.domain.BizProject;
 import com.ruoyi.system.domain.Block;
 import com.ruoyi.system.domain.BlockData;
+import com.ruoyi.system.domain.LuckValueVO;
 import com.ruoyi.system.domain.vo.MiningMachineVO;
 import com.ruoyi.system.service.IBizProjectService;
 import com.ruoyi.system.service.ISysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/app/pool")
-@Api(tags = "矿池管理")
+@Api(tags = "APP端矿池管理")
 public class APPMiningPoolController {
 
     @Autowired
@@ -53,18 +54,18 @@ public class APPMiningPoolController {
     @GetMapping("/luck")
     @ApiOperation("幸运值")
     @Anonymous
-    public AjaxResult luck() {
+    public R<LuckValueVO> luck() {
         String redisKey = "luckValue";
-        AjaxResult req = redisCache.getCacheObject(redisKey);
+        R<LuckValueVO> req = redisCache.getCacheObject(redisKey);
         if (req != null) {
             return req;
         }
         double luckValue3Day = getLuckValue(-3);
         double luckValue7Day = getLuckValue(-7);
-        HashMap<Object, Object> vo = new HashMap<>();
-        vo.put("threeDay", luckValue3Day);
-        vo.put("sevenDay", luckValue7Day);
-        AjaxResult success = AjaxResult.success(vo);
+        LuckValueVO vo = new LuckValueVO();
+        vo.setThreeDay(luckValue3Day);
+        vo.setSevenDay(luckValue7Day);
+        R<LuckValueVO> success = R.ok(vo);
         redisCache.setCacheObject(redisKey,success,5, TimeUnit.MINUTES);
         return success;
     }
@@ -117,9 +118,9 @@ public class APPMiningPoolController {
     @GetMapping("/list")
     @Anonymous
     @ApiOperation("矿机数据")
-    private AjaxResult list() {
+    private R<ArrayList<MiningMachineVO>> list() {
         String redisKey = "kjValue";
-        AjaxResult req = redisCache.getCacheObject(redisKey);
+        R<ArrayList<MiningMachineVO>> req = redisCache.getCacheObject(redisKey);
         if (req != null) return req;
         BigDecimal unitFee = new BigDecimal(configService.selectConfigByKey("daily_power_fee"));
         BigDecimal unitYield = new BigDecimal(configService.selectConfigByKey("daily_per_t_yield"));
@@ -146,7 +147,7 @@ public class APPMiningPoolController {
             miningMachineVO.setShutdownPrice(electricityFee.divide(outputBTC,2, RoundingMode.DOWN));
             miningMachineVOS.add(miningMachineVO);
         }
-        AjaxResult success = AjaxResult.success(miningMachineVOS);
+        R<ArrayList<MiningMachineVO>> success = R.ok(miningMachineVOS);
         redisCache.setCacheObject(redisKey,success,5, TimeUnit.MINUTES);
         return success;
     }

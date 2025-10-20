@@ -1,6 +1,8 @@
 package com.ruoyi.system.domain;
 
 import java.math.BigDecimal;
+
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -21,51 +23,64 @@ public class BizLog extends BaseEntity
 
     /** 用户ID */
     @Excel(name = "用户ID")
+    @ApiModelProperty("用户ID")
     private Long userId;
 
     /** 发起方ID */
     @Excel(name = "发起方ID")
+    @ApiModelProperty("发起方ID")
     private Long fromUserId;
 
     /** 接收方ID */
     @Excel(name = "接收方ID")
+    @ApiModelProperty("接收方ID")
     private Long toUserId;
 
     /** 金额 */
     @Excel(name = "金额")
+    @ApiModelProperty("金额")
     private BigDecimal amount;
 
     /** 三种类型：（aiu,aiux,usdt） */
     @Excel(name = "三种类型：", readConverterExp = "a=iu,aiux,usdt")
+    @ApiModelProperty("两种类型：（usdt,btc）")
     private String coinType;
 
     /** 变动前的金额 */
     @Excel(name = "变动前的金额")
+    @ApiModelProperty("变动前的金额")
     private BigDecimal beforeAmount;
 
     /** 关联ID */
     @Excel(name = "关联ID")
+    @ApiModelProperty("关联ID")
     private String orderNo;
 
     /** 日志类型 */
     @Excel(name = "日志类型")
+    @ApiModelProperty("日志类型")
     private String logType;
 
     /**  日志状态 */
     @Excel(name = " 日志状态")
+    @ApiModelProperty("日志状态")
     private String logStatus;
 
     /** 入账地址 */
     @Excel(name = "入账地址")
+    @ApiModelProperty("入账地址")
     private String address;
 
     @Excel(name = "手续费")
+    @ApiModelProperty("手续费")
     private BigDecimal fee;
 
     @Excel(name = "电费")
+    @ApiModelProperty("电费")
     private BigDecimal dailyPowerFee;
 
     @Excel(name = "txId")
+    @ApiModelProperty("交易ID")
     private String txId;
 
     public BigDecimal getFee() {

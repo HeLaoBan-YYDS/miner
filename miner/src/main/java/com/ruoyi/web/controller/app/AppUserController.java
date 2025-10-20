@@ -1,11 +1,11 @@
 package com.ruoyi.web.controller.app;
 
 
-import cn.hutool.core.collection.CollUtil;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginBody;
 import com.ruoyi.common.core.domain.model.LoginUser;
@@ -14,14 +14,11 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.enums.LogType;
 import com.ruoyi.common.enums.OrderStatusEnum;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.framework.web.service.SysRegisterService;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizOrder;
-import com.ruoyi.system.domain.vo.BizLogVo;
 import com.ruoyi.system.domain.vo.UserInfoVo;
 import com.ruoyi.system.service.IBizLogService;
 import com.ruoyi.system.service.IBizOrderService;
@@ -35,11 +32,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/app/user")
@@ -89,10 +83,10 @@ public class AppUserController extends BaseController {
     @GetMapping("/info")
     @PreAuthorize("@ss.hasRole('user')")
     @ApiOperation("用户信息")
-    public AjaxResult userinfo() {
+    public R<UserInfoVo> userinfo() {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (loginUser == null) {
-            return error(MessageUtils.message("user.notfound"));
+            throw new ServiceException(MessageUtils.message("user.notfound"));
         }
 
         //查询我的订单
@@ -104,7 +98,7 @@ public class AppUserController extends BaseController {
         //查询我的信息
         SysUser sysUser = userService.selectUserById(loginUser.getUserId());
         if (sysUser == null) {
-            return error(MessageUtils.message("user.notfound"));
+            throw new ServiceException(MessageUtils.message("user.notfound"));
         }
 
         //我的总算力
@@ -138,14 +132,15 @@ public class AppUserController extends BaseController {
         userInfoVo.setPlatformTotalComputePower(platformTotalComputePower);
         userInfoVo.setYesterdayIncome(yesterdayIncome);
         userInfoVo.setTotalIncome(totalIncome);
-        return success(userInfoVo);
+        return R.ok(userInfoVo);
     }
 
     @GetMapping("recharge/list")
     @PreAuthorize("@ss.hasRole('user')")
     @ApiOperation("充值记录-记得分页参数")
-    public TableDataInfo rechargeList(BizLog bizLog)
+    public TableDataInfo<List<BizLog>> rechargeList()
     {
+        BizLog bizLog = new BizLog();
         startPage();
         bizLog.setUserId(getUserId());
         bizLog.setLogType(LogType.RECHARGE.getCode());
@@ -155,9 +150,10 @@ public class AppUserController extends BaseController {
 
     @GetMapping("withdraw/list")
     @PreAuthorize("@ss.hasRole('user')")
-    @ApiOperation("充值记录-记得分页参数")
-    public TableDataInfo withdrawList(BizLog bizLog)
+    @ApiOperation("提现记录-记得分页参数")
+    public TableDataInfo<List<BizLog>> withdrawList()
     {
+        BizLog bizLog = new BizLog();
         startPage();
         bizLog.setUserId(getUserId());
         bizLog.setLogType(LogType.WITHDRAW.getCode());

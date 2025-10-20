@@ -33,7 +33,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/app/google")
-@Api(tags = "谷歌回调")
+@Api(tags = "APP端谷歌回调")
 public class AppGoogleController {
 
     @Autowired

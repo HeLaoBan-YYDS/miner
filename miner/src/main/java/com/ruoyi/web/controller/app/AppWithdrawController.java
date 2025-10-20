@@ -13,6 +13,7 @@ import com.ruoyi.system.service.IBizWithdrawService;
 import com.ruoyi.system.service.ISysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
@@ -44,7 +45,7 @@ public class AppWithdrawController {
     @GetMapping("/fee")
     @Anonymous
     @ApiOperation("获取提现手续费")
-    public AjaxResult withdrawFee(String  coin) {
+    public AjaxResult withdrawFee(@ApiParam("传递 usdt_fee 或者 btc_fee") String  coin) {
         String value = configService.selectConfigByKey(coin);
         return AjaxResult.success(value);
     }
