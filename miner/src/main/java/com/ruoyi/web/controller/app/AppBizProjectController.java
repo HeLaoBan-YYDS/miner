@@ -46,7 +46,7 @@ public class AppBizProjectController extends BaseController
      * 查询项目基本信息列表
      */
     @GetMapping("/list")
-    @ApiOperation("项目列表")
+    @ApiOperation(value = "项目列表",response = ProjectVo.class)
     @Anonymous
     public TableDataInfo list(BizProject bizProject)
     {
@@ -62,7 +62,7 @@ public class AppBizProjectController extends BaseController
      * 查询项目基本信息列表
      */
     @GetMapping("/apr")
-    @ApiOperation("项目列表")
+    @ApiOperation("APR")
     @Anonymous
     public AjaxResult apr()
     {

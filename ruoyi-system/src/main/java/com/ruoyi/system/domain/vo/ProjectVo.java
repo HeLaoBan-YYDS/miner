@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import cn.hutool.core.date.DateUtil;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -17,6 +19,7 @@ import javax.xml.crypto.Data;
  * @author Remi
  * @date 2025-09-16
  */
+@ApiModel("项目列表响应")
 public class ProjectVo extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
@@ -26,38 +29,47 @@ public class ProjectVo extends BaseEntity
 
     /** 项目名称 */
     @Excel(name = "项目名称")
+    @ApiModelProperty("项目名称")
     private String projectName;
 
     /** 算力(T) */
     @Excel(name = "算力(T)")
+    @ApiModelProperty("算力(T)")
     private BigDecimal computePower;
 
     /** 功耗(W) */
     @Excel(name = "功耗(KW)")
+    @ApiModelProperty("功耗(KW)")
     private BigDecimal powerConsumption;
 
     /** 单价(U/T) */
     @Excel(name = "单价(U/T)")
+    @ApiModelProperty("单价(U/T)")
     private BigDecimal unitPrice;
 
     /** 最小起购(T) */
     @Excel(name = "最小起购(T)")
+    @ApiModelProperty("最小起购(T)")
     private BigDecimal minPurchase;
 
     /** 等待期(天) */
     @Excel(name = "等待期(天)")
+    @ApiModelProperty("等待期(天)")
     private Long waitingPeriod;
 
     /** 收益周期(天) */
     @Excel(name = "收益周期(天)")
+    @ApiModelProperty("收益周期(天)")
     private Long incomeCycle;
 
     /** 项目简介 */
     @Excel(name = "项目简介图片")
+    @ApiModelProperty("项目简介图片")
     private String intro;
 
     /** 项目描述 */
     @Excel(name = "项目描述")
+    @ApiModelProperty("项目描述")
     private String description;
 
 
