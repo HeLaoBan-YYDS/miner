@@ -76,8 +76,23 @@ public class BizOrder extends BaseEntity
     @ApiModelProperty("分红模式Id")
     private Long shareModeId;
 
+    /**
+     * 回本进度
+     */
+    @Excel(name = "回本进度")
+    @ApiModelProperty("回本进度")
+    private BigDecimal backProgress;
+
     /** 删除标志（0存在 2删除） */
     private String delFlag;
+
+    public BigDecimal getBackProgress() {
+        return backProgress;
+    }
+
+    public void setBackProgress(BigDecimal backProgress) {
+        this.backProgress = backProgress;
+    }
 
     public Long getShareModeId() {
         return shareModeId;

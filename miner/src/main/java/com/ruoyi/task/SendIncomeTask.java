@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Component("sendIncomeTask")
@@ -188,6 +189,15 @@ public class SendIncomeTask {
 
         //记录奖励日志
         saveIncomeLog(bizOrder, income,electricityFee);
+
+        //清理缓存
+        CompletableFuture.runAsync(() -> {
+            try {
+                orderService.innitCache(bizOrder);
+            } catch (Exception e) {
+                log.error("清理缓存失败", e);
+            }
+        });
     }
 
     private void savePowerFeeLog(BizOrder bizOrder, BigDecimal orderPowerFee) {
@@ -264,11 +274,13 @@ public class SendIncomeTask {
     private boolean isReturn(BizOrder bizOrder) {
         BigDecimal paymentAmount = bizOrder.getPaymentAmount();
 
-        BigDecimal orderTotalIncomeBTC = orderService.getIncomeByOrderId(bizOrder.getOrderId());
+        BigDecimal orderTotalIncomeUSDT = orderService.getIncomeUSDTByOrderId(bizOrder.getOrderId());
 
-        BigDecimal orderTotalIncomeUSDT = btcPriceUtil.btcToUsdt(orderTotalIncomeBTC);
+        BigDecimal totalFeeUSDT = orderService.getFeeUSDTByOrderId(bizOrder.getOrderId());
 
-        return orderTotalIncomeUSDT.compareTo(paymentAmount) > 0;
+        BigDecimal orderTotalProfit = orderTotalIncomeUSDT.subtract(totalFeeUSDT);
+
+        return orderTotalProfit.compareTo(paymentAmount) >= 0;
     }
 
     private BigDecimal deductElectricityFee(BizOrder bizOrder) {

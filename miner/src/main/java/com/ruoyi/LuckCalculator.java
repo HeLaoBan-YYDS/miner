@@ -28,7 +28,7 @@ public class LuckCalculator {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(usdtToBtc(new BigDecimal("1693.4400000000")));
+        System.out.println(btcToUsdt(new BigDecimal("0.0000043")));
     }
 
 
@@ -41,6 +41,17 @@ public class LuckCalculator {
             return BigDecimal.ZERO;
         }
         return usdtAmount.divide(price, 8, RoundingMode.DOWN);
+    }
+
+    /**
+     * BTC转USDT
+     */
+    public static BigDecimal btcToUsdt(BigDecimal btcAmount) {
+        BigDecimal price = getBtcUsdtPrice();
+        if (btcAmount == null) {
+            return BigDecimal.ZERO;
+        }
+        return btcAmount.multiply(price).setScale(8, RoundingMode.DOWN);
     }
 
 

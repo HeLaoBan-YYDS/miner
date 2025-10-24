@@ -78,6 +78,12 @@ public class ProjectVo extends BaseEntity
     @ApiModelProperty("预计回本(天)")
     private BigDecimal returnAmount;
 
+    @ApiModelProperty("开始挖矿时间")
+    private String startMiningTime;
+
+    @ApiModelProperty("结束挖矿时间")
+    private String endMiningTime;
+
     public BigDecimal getReturnAmount() {
         return returnAmount;
     }
@@ -94,6 +100,7 @@ public class ProjectVo extends BaseEntity
         this.apr = apr;
     }
 
+    @ApiModelProperty("开始挖矿时间")
     public String getStartMiningTime() {
         if (waitingPeriod == null || incomeCycle == null){
             return null;
@@ -101,6 +108,7 @@ public class ProjectVo extends BaseEntity
         return DateUtil.offsetDay(new Date(), waitingPeriod.intValue()).toString();
     }
 
+    @ApiModelProperty("开始挖矿时间")
     public String getEndMiningTime() {
         if (waitingPeriod == null || incomeCycle == null){
             return null;

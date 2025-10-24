@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class AppOrderController extends BaseController {
 
     @Autowired
     private IBizLogService bizLogService;
+
 
     @PostMapping("/place")
     @PreAuthorize("@ss.hasRole('user')")
@@ -75,6 +77,11 @@ public class AppOrderController extends BaseController {
         List<BizOrder> list = orderService.selectBizOrderList(bizOrder);
         for (BizOrder order : list) {
             order.setProjectName(DictUtils.getDictLabel("project_dict",order.getProjectId().toString()));
+            //获得回本进度
+            BigDecimal orderFee = orderService.getFeeUSDTByOrderId(order.getOrderId());
+            BigDecimal orderIncome = orderService.getIncomeUSDTByOrderId(order.getOrderId());
+            BigDecimal backProgress = orderIncome.subtract(orderFee).divide(order.getPaymentAmount(),4,BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100));
+            order.setBackProgress(backProgress);
         }
         return getDataTable(list);
     }

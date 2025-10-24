@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollUtil;
@@ -19,10 +18,7 @@ import com.ruoyi.common.enums.LogStatus;
 import com.ruoyi.common.enums.LogType;
 import com.ruoyi.common.enums.OrderStatusEnum;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.DictUtils;
-import com.ruoyi.common.utils.MessageUtils;
-import com.ruoyi.common.utils.OrderNoUtils;
+import com.ruoyi.common.utils.*;
 import com.ruoyi.system.domain.BizLog;
 import com.ruoyi.system.domain.BizProject;
 import com.ruoyi.system.domain.ShareConfig;
@@ -60,6 +56,17 @@ public class BizOrderServiceImpl implements IBizOrderService
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private BtcPriceUtil btcPriceUtil;
+
+    private static final String TOTAL_INCOME_ = "TOTAL_INCOME_";
+
+    private static final String YESTERDAY_INCOME_ = "YESTERDAY_INCOME_";
+
+    private static final String ORDER_INCOME_ = "ORDER_INCOME_";
+
+    private static final String ORDER_FEE_ = "ORDER_FEE_";
 
     /**
      * 查询订单
@@ -196,21 +203,24 @@ public class BizOrderServiceImpl implements IBizOrderService
     }
 
 
+    /**
+     * 每天早上8点发放的收益就是用户昨天矿机的收益，所以这里查询昨日收益,其实系统时间是今天早上8点后的收益
+     * @param userId 用户ID
+     * @return 昨日收益
+     */
     @Override
     public BigDecimal getYesterdayIncome(Long userId) {
-        String redisKey = "YESTERDAY_INCOME_" + userId;
+        String redisKey = YESTERDAY_INCOME_ + userId;
         String yIncome = redisCache.getCacheObject(redisKey);
         if (yIncome != null) {
             return new BigDecimal(yIncome);
         }
-
         Date todayStart = DateUtil.beginOfDay(new Date());
+        todayStart = DateUtil.offsetHour(todayStart, 8);
         Date todayEnd = DateUtil.endOfDay(new Date());
-        Date yesterdayStart = DateUtils.addDays(todayStart, -1);
-        Date yesterdayEnd = DateUtils.addDays(todayEnd, -1);
-        BigDecimal income = getIncomeByRange(userId, yesterdayStart, yesterdayEnd);
+        BigDecimal income = getIncomeByRange(userId, todayStart, todayEnd);
         yIncome = income.toString();
-        redisCache.setCacheObject(redisKey,yIncome,5, TimeUnit.MINUTES);
+        redisCache.setCacheObject(redisKey,yIncome);
         return income;
     }
 
@@ -218,31 +228,46 @@ public class BizOrderServiceImpl implements IBizOrderService
 
     @Override
     public BigDecimal getTotalIncome(Long userId) {
-        String redisKey = "TOTAL_INCOME_" + userId;
+        String redisKey = TOTAL_INCOME_ + userId;
         String tIncome = redisCache.getCacheObject(redisKey);
         if (tIncome != null) {
             return new BigDecimal(tIncome);
         }
         BigDecimal income = getIncomeByRange(userId, null, null);
         tIncome = income.toString();
-        redisCache.setCacheObject(redisKey,tIncome,5, TimeUnit.MINUTES);
+        redisCache.setCacheObject(redisKey,tIncome);
         return income;
     }
 
     @Override
-    public BigDecimal getIncomeByOrderId(String orderId) {
-        String redisKey = "ORDER_INCOME_" + orderId;
-        String tIncome = redisCache.getCacheObject(redisKey);
-        if (tIncome != null) {
-            return new BigDecimal(tIncome);
+    public BigDecimal getIncomeUSDTByOrderId(String orderId) {
+        String redisKey = ORDER_INCOME_ + orderId;
+        String tIncomeUSDT = redisCache.getCacheObject(redisKey);
+        if (tIncomeUSDT != null) {
+            return new BigDecimal(tIncomeUSDT);
         }
-        BigDecimal income = calIncomeByOrderNo(orderId);
-        tIncome = income.toString();
-        redisCache.setCacheObject(redisKey,tIncome,5, TimeUnit.MINUTES);
+        BigDecimal income = calIncomeBTCByOrderNo(orderId);
+        tIncomeUSDT = btcPriceUtil.btcToUsdt(income).toString();
+        redisCache.setCacheObject(redisKey,tIncomeUSDT);
         return income;
     }
 
-    private BigDecimal calIncomeByOrderNo(String orderNo) {
+
+    @Override
+    public BigDecimal getFeeUSDTByOrderId(String orderId) {
+        String redisKey = ORDER_FEE_ + orderId;
+        String tFee = redisCache.getCacheObject(redisKey);
+        if (tFee != null) {
+            return new BigDecimal(tFee);
+        }
+        BigDecimal totalFee = calFeeUSDTByOrderId(orderId);
+        tFee = totalFee.toString();
+        redisCache.setCacheObject(redisKey,tFee);
+        return totalFee;
+    }
+
+
+    private BigDecimal calIncomeBTCByOrderNo(String orderNo) {
         BizLog bizLog = new BizLog();
         bizLog.setLogType(LogType.INCOME.getCode());
         bizLog.setOrderNo(orderNo);
@@ -251,6 +276,18 @@ public class BizOrderServiceImpl implements IBizOrderService
             return BigDecimal.ZERO;
         }
         return bizLogs.stream().map(BizLog::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+
+    private BigDecimal calFeeUSDTByOrderId(String orderNo) {
+        BizLog bizLog = new BizLog();
+        bizLog.setLogType(LogType.POWER_FEE.getCode());
+        bizLog.setOrderNo(orderNo);
+        List<BizLog> bizLogs = bizLogMapper.selectBizLogList(bizLog);
+        if (CollUtil.isEmpty(bizLogs)) {
+            return BigDecimal.ZERO;
+        }
+        return bizLogs.stream().map(BizLog::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).negate();
     }
 
 
@@ -283,4 +320,19 @@ public class BizOrderServiceImpl implements IBizOrderService
         }
         return Collections.emptyList();
     }
+
+    @Override
+    public void innitCache(BizOrder bizOrder) {
+        redisCache.deleteObject(YESTERDAY_INCOME_ + bizOrder.getUserId());
+        redisCache.deleteObject(TOTAL_INCOME_ + bizOrder.getUserId());
+        redisCache.deleteObject(ORDER_INCOME_ + bizOrder.getOrderId());
+        redisCache.deleteObject(ORDER_FEE_ + bizOrder.getOrderId());
+
+        this.getYesterdayIncome(bizOrder.getUserId());
+        this.getTotalIncome(bizOrder.getUserId());
+        this.getIncomeUSDTByOrderId(bizOrder.getOrderId());
+        this.getFeeUSDTByOrderId(bizOrder.getOrderId());
+    }
+
+
 }

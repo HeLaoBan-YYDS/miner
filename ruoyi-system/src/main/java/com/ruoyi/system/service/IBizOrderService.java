@@ -82,11 +82,19 @@ public interface IBizOrderService
      */
     public BigDecimal getTotalIncome(Long userId);
 
-    BigDecimal getIncomeByOrderId(String orderId);
+    BigDecimal getIncomeUSDTByOrderId(String orderId);
+
+    BigDecimal getFeeUSDTByOrderId(String orderId);
 
     /**
      * 获取分红模式
      * @return 分红模式
      */
     List<ShareConfig> selectMode();
+
+    /**
+     * 清除缓存
+     * @param bizOrder
+     */
+    void innitCache(BizOrder bizOrder);
 }

@@ -31,6 +31,7 @@
 	<select id="selectBizOrderList" parameterType="BizOrder" resultMap="BizOrderResult">
 		<include refid="selectBizOrderVo"/>
 		<where>
+			<if test="orderId != null"> and order_id = #{orderId}</if>
 			<if test="userId != null "> and user_id = #{userId}</if>
 			<if test="projectId != null "> and project_id = #{projectId}</if>
 			<if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
