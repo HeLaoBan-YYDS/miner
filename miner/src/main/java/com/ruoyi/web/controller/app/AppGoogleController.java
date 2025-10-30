@@ -60,61 +60,61 @@ public class AppGoogleController {
     private String URI;
 
 
-    @GetMapping("/oauth/callback")
-    @Anonymous
-    @ApiOperation("谷歌登录回调")
-    public AjaxResult callback(@RequestParam("code") String code) throws IOException {
-        // 1. 交换 access token
-        GoogleTokenResponse tokenResponse =
-                new GoogleAuthorizationCodeTokenRequest(
-                        new NetHttpTransport(),
-                        JacksonFactory.getDefaultInstance(),
-                        "https://oauth2.googleapis.com/token",
-                        ID,
-                        SECRET,
-                        code,
-                        URI
-                ).execute();
-
-        // 2. 解析 ID token
-        GoogleIdToken idToken = tokenResponse.parseIdToken();
-        GoogleIdToken.Payload payload = idToken.getPayload();
-
-        String email = payload.getEmail();
-        String name = (String) payload.get("name");
-        String picture = (String) payload.get("picture");
-
-        // 3. 本地数据库检查
-        SysUser user = userService.selectUserByUserName(email);
-        if (user == null) {
-            user = new SysUser();
-            user.setUserName(email);
-            user.setNickName(name);
-            user.setEmail(email);
-            user.setAvatar(picture);
-            user.setPassword(SecurityUtils.encryptPassword(UUID.randomUUID().toString()));
-            userService.insertUser(user);
-            user.setRoleIds(new Long[]{2L});
-            userService.insertUserRole(user);
-        }
-
-
-        SysRole sysRole = roleService.selectRoleById(2L);
-        user.setRoles(Collections.singletonList(sysRole));
-        Set<String> permissions = menuService.selectMenuPermsByRoleId(2L);
-        LoginUser loginUser = new LoginUser(user.getUserId(),null,user, permissions);
-
-
-        // 4. 生成若依 JWT token
-        String token = tokenService.createToken(loginUser);
-
-
-        AjaxResult ajax = AjaxResult.success();
-        ajax.put(Constants.TOKEN, token);
-
-        // 5. 返回结果（前端会保存 token）
-        return ajax;
-    }
+//    @GetMapping("/oauth/callback")
+//    @Anonymous
+//    @ApiOperation("谷歌登录回调")
+//    public AjaxResult callback(@RequestParam("code") String code) throws IOException {
+//        // 1. 交换 access token
+//        GoogleTokenResponse tokenResponse =
+//                new GoogleAuthorizationCodeTokenRequest(
+//                        new NetHttpTransport(),
+//                        JacksonFactory.getDefaultInstance(),
+//                        "https://oauth2.googleapis.com/token",
+//                        ID,
+//                        SECRET,
+//                        code,
+//                        URI
+//                ).execute();
+//
+//        // 2. 解析 ID token
+//        GoogleIdToken idToken = tokenResponse.parseIdToken();
+//        GoogleIdToken.Payload payload = idToken.getPayload();
+//
+//        String email = payload.getEmail();
+//        String name = (String) payload.get("name");
+//        String picture = (String) payload.get("picture");
+//
+//        // 3. 本地数据库检查
+//        SysUser user = userService.selectUserByUserName(email);
+//        if (user == null) {
+//            user = new SysUser();
+//            user.setUserName(email);
+//            user.setNickName(name);
+//            user.setEmail(email);
+//            user.setAvatar(picture);
+//            user.setPassword(SecurityUtils.encryptPassword(UUID.randomUUID().toString()));
+//            userService.insertUser(user);
+//            user.setRoleIds(new Long[]{2L});
+//            userService.insertUserRole(user);
+//        }
+//
+//
+//        SysRole sysRole = roleService.selectRoleById(2L);
+//        user.setRoles(Collections.singletonList(sysRole));
+//        Set<String> permissions = menuService.selectMenuPermsByRoleId(2L);
+//        LoginUser loginUser = new LoginUser(user.getUserId(),null,user, permissions);
+//
+//
+//        // 4. 生成若依 JWT token
+//        String token = tokenService.createToken(loginUser);
+//
+//
+//        AjaxResult ajax = AjaxResult.success();
+//        ajax.put(Constants.TOKEN, token);
+//
+//        // 5. 返回结果（前端会保存 token）
+//        return ajax;
+//    }
 
     @GetMapping("/oauth/callback")
     @Anonymous
