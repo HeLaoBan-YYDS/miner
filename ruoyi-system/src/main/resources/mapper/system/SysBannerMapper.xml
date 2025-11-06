@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysBannerMapper">
+
+	<resultMap type="SysBanner" id="SysBannerResult">
+		<result property="bannerId"    column="banner_id"    />
+		<result property="bannerTitle"    column="banner_title"    />
+		<result property="bannerImage"    column="banner_image"    />
+		<result property="bannerUrl"    column="banner_url"    />
+		<result property="bannerPosition"    column="banner_position"    />
+		<result property="sortOrder"    column="sort_order"    />
+		<result property="createBy"    column="create_by"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateBy"    column="update_by"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="delFlag"    column="del_flag"    />
+		<result property="language"    column="language"    />
+	</resultMap>
+
+	<sql id="selectSysBannerVo">
+		select banner_id, banner_title, banner_image, banner_url, banner_position, sort_order, create_by, create_time, update_by, update_time, del_flag, language from sys_banner
+	</sql>
+
+	<select id="selectSysBannerList" parameterType="SysBanner" resultMap="SysBannerResult">
+		<include refid="selectSysBannerVo"/>
+		<where>
+			<if test="bannerTitle != null  and bannerTitle != ''"> and banner_title = #{bannerTitle}</if>
+			<if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+			<if test="language != null  and language != ''"> and language = #{language}</if>
+		</where>
+	</select>
+
+	<select id="selectSysBannerByBannerId" parameterType="Long" resultMap="SysBannerResult">
+		<include refid="selectSysBannerVo"/>
+		where banner_id = #{bannerId}
+	</select>
+
+	<insert id="insertSysBanner" parameterType="SysBanner" useGeneratedKeys="true" keyProperty="bannerId">
+		insert into sys_banner
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bannerTitle != null and bannerTitle != ''">banner_title,</if>
+			<if test="bannerImage != null and bannerImage != ''">banner_image,</if>
+			<if test="bannerUrl != null">banner_url,</if>
+			<if test="bannerPosition != null">banner_position,</if>
+			<if test="sortOrder != null">sort_order,</if>
+			<if test="createBy != null">create_by,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="updateBy != null">update_by,</if>
+			<if test="updateTime != null">update_time,</if>
+			<if test="delFlag != null">del_flag,</if>
+			<if test="language != null">language,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bannerTitle != null and bannerTitle != ''">#{bannerTitle},</if>
+			<if test="bannerImage != null and bannerImage != ''">#{bannerImage},</if>
+			<if test="bannerUrl != null">#{bannerUrl},</if>
+			<if test="bannerPosition != null">#{bannerPosition},</if>
+			<if test="sortOrder != null">#{sortOrder},</if>
+			<if test="createBy != null">#{createBy},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="updateBy != null">#{updateBy},</if>
+			<if test="updateTime != null">#{updateTime},</if>
+			<if test="delFlag != null">#{delFlag},</if>
+			<if test="language != null">#{language},</if>
+		</trim>
+	</insert>
+
+	<update id="updateSysBanner" parameterType="SysBanner">
+		update sys_banner
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="bannerTitle != null and bannerTitle != ''">banner_title = #{bannerTitle},</if>
+			<if test="bannerImage != null and bannerImage != ''">banner_image = #{bannerImage},</if>
+			<if test="bannerUrl != null">banner_url = #{bannerUrl},</if>
+			<if test="bannerPosition != null">banner_position = #{bannerPosition},</if>
+			<if test="sortOrder != null">sort_order = #{sortOrder},</if>
+			<if test="createBy != null">create_by = #{createBy},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateBy != null">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="delFlag != null">del_flag = #{delFlag},</if>
+			<if test="language != null">language = #{language},</if>
+		</trim>
+		where banner_id = #{bannerId}
+	</update>
+
+	<delete id="deleteSysBannerByBannerId" parameterType="Long">
+		delete from sys_banner where banner_id = #{bannerId}
+	</delete>
+
+	<delete id="deleteSysBannerByBannerIds" parameterType="String">
+		delete from sys_banner where banner_id in
+		<foreach item="bannerId" collection="array" open="(" separator="," close=")">
+			#{bannerId}
+		</foreach>
+	</delete>
+</mapper>
