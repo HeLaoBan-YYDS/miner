@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.common.core.domain.entity.SysDictData;
+import com.ruoyi.system.domain.ShareConfig;
 
 /**
  * 字典 业务层
@@ -59,4 +60,6 @@ public interface ISysDictDataService
     public int updateDictData(SysDictData dictData);
 
     void updateProjectTypeDict(String projectId, String projectName);
+
+    ShareConfig selectShareMode(Long modeId);
 }

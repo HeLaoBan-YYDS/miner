@@ -1,6 +1,9 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+
+import cn.hutool.json.JSONUtil;
+import com.ruoyi.system.domain.ShareConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.core.domain.entity.SysDictData;
@@ -117,5 +120,19 @@ public class SysDictDataServiceImpl implements ISysDictDataService
             List<SysDictData> dictDatas = dictDataMapper.selectDictDataByType("project_dict");
             DictUtils.setDictCache("project_dict", dictDatas);
         }
+    }
+
+
+    /**
+     * 查询分享模式
+     * @param modeId modeId
+     * @return 分红模式
+     */
+    @Override
+    public ShareConfig selectShareMode(Long modeId) {
+        SysDictData sysDictData = selectDictDataById(modeId);
+        ShareConfig bean = JSONUtil.toBean(sysDictData.getDictValue(), ShareConfig.class);
+        bean.setId(sysDictData.getDictCode());
+        return bean;
     }
 }

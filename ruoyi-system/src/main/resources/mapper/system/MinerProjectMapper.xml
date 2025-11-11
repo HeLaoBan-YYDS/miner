@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MinerProjectMapper">
+
+	<resultMap type="MinerProject" id="MinerProjectResult">
+		<result property="id"    column="id"    />
+		<result property="projectName"    column="project_name"    />
+		<result property="productImage"    column="product_image"    />
+		<result property="packageType"    column="package_type"    />
+		<result property="purchaseLimit"    column="purchase_limit"    />
+		<result property="computePowerType"    column="compute_power_type"    />
+		<result property="computePower"    column="compute_power"    />
+		<result property="powerConsumption"    column="power_consumption"    />
+		<result property="unitPrice"    column="unit_price"    />
+		<result property="unitPowerCost"    column="unit_power_cost"    />
+		<result property="machineUnitPrice"    column="machine_unit_price"    />
+		<result property="minPurchase"    column="min_purchase"    />
+		<result property="maxPurchase"    column="max_purchase"    />
+		<result property="minFirstPaymentDays"    column="min_first_payment_days"    />
+		<result property="planCycle"    column="plan_cycle"    />
+		<result property="batchTagType"    column="batch_tag_type"    />
+		<result property="machineCount"    column="machine_count"    />
+		<result property="saleStartTime"    column="sale_start_time"    />
+		<result property="saleEndTime"    column="sale_end_time"    />
+		<result property="expectedOnlineTime"    column="expected_online_time"    />
+		<result property="mineLoad"    column="mine_load"    />
+		<result property="mineLocation"    column="mine_location"    />
+		<result property="historicalOnlineRate"    column="historical_online_rate"    />
+		<result property="delFlag"    column="del_flag"    />
+		<result property="createBy"    column="create_by"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateBy"    column="update_by"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="remark"    column="remark"    />
+		<result property="sort"    column="sort"    />
+		<result property="tagType"    column="tag_type"    />
+		<result property="type"    column="type"    />
+		<result property="reservedFieldOne"    column="reserved_field_one"    />
+		<result property="reservedFieldTwo"    column="reserved_field_two"    />
+		<result property="reservedFieldThree"    column="reserved_field_three"    />
+		<result property="singleDayStaticOutputBtc"    column="single_day_static_output_btc"    />
+		<result property="serviceFeeUnitPrice"    column="service_fee_unit_price"    />
+		<result property="depositDays"    column="deposit_days"    />
+		<result property="residualValue"    column="residual_value"    />
+	</resultMap>
+
+	<sql id="selectMinerProjectVo">
+		select id, project_name, product_image, package_type, purchase_limit, compute_power_type, compute_power, power_consumption, unit_price, unit_power_cost, machine_unit_price, min_purchase, max_purchase, min_first_payment_days, plan_cycle, batch_tag_type, machine_count, sale_start_time, sale_end_time, expected_online_time, mine_load, mine_location, historical_online_rate, del_flag, create_by, create_time, update_by, update_time, remark, sort, tag_type, type, reserved_field_one, reserved_field_two, reserved_field_three, single_day_static_output_btc, service_fee_unit_price, deposit_days, residual_value from miner_project
+	</sql>
+
+	<select id="selectMinerProjectList" parameterType="MinerProject" resultMap="MinerProjectResult">
+		<include refid="selectMinerProjectVo"/>
+		<where>
+			<if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+			<if test="packageType != null  and packageType != ''"> and package_type = #{packageType}</if>
+			<if test="purchaseLimit != null  and purchaseLimit != ''"> and purchase_limit = #{purchaseLimit}</if>
+			<if test="computePowerType != null  and computePowerType != ''"> and compute_power_type = #{computePowerType}</if>
+			<if test="batchTagType != null  and batchTagType != ''"> and batch_tag_type = #{batchTagType}</if>
+			<if test="params.beginSaleStartTime != null and params.beginSaleStartTime != '' and params.endSaleStartTime != null and params.endSaleStartTime != ''"> and sale_start_time between #{params.beginSaleStartTime} and #{params.endSaleStartTime}</if>
+			<if test="tagType != null  and tagType != ''"> and tag_type = #{tagType}</if>
+			<if test="type != null  and type != ''"> and type = #{type}</if>
+		</where>
+	</select>
+
+	<select id="selectMinerProjectById" parameterType="Long" resultMap="MinerProjectResult">
+		<include refid="selectMinerProjectVo"/>
+		where id = #{id}
+	</select>
+
+	<insert id="insertMinerProject" parameterType="MinerProject" useGeneratedKeys="true" keyProperty="id">
+		insert into miner_project
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="projectName != null and projectName != ''">project_name,</if>
+			<if test="productImage != null">product_image,</if>
+			<if test="packageType != null">package_type,</if>
+			<if test="purchaseLimit != null">purchase_limit,</if>
+			<if test="computePowerType != null">compute_power_type,</if>
+			<if test="computePower != null">compute_power,</if>
+			<if test="powerConsumption != null">power_consumption,</if>
+			<if test="unitPrice != null">unit_price,</if>
+			<if test="unitPowerCost != null">unit_power_cost,</if>
+			<if test="machineUnitPrice != null">machine_unit_price,</if>
+			<if test="minPurchase != null">min_purchase,</if>
+			<if test="maxPurchase != null">max_purchase,</if>
+			<if test="minFirstPaymentDays != null">min_first_payment_days,</if>
+			<if test="planCycle != null">plan_cycle,</if>
+			<if test="batchTagType != null">batch_tag_type,</if>
+			<if test="machineCount != null">machine_count,</if>
+			<if test="saleStartTime != null">sale_start_time,</if>
+			<if test="saleEndTime != null">sale_end_time,</if>
+			<if test="expectedOnlineTime != null">expected_online_time,</if>
+			<if test="mineLoad != null">mine_load,</if>
+			<if test="mineLocation != null">mine_location,</if>
+			<if test="historicalOnlineRate != null">historical_online_rate,</if>
+			<if test="delFlag != null">del_flag,</if>
+			<if test="createBy != null">create_by,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="updateBy != null">update_by,</if>
+			<if test="updateTime != null">update_time,</if>
+			<if test="remark != null">remark,</if>
+			<if test="sort != null">sort,</if>
+			<if test="tagType != null">tag_type,</if>
+			<if test="type != null and type != ''">type,</if>
+			<if test="reservedFieldOne != null">reserved_field_one,</if>
+			<if test="reservedFieldTwo != null">reserved_field_two,</if>
+			<if test="reservedFieldThree != null">reserved_field_three,</if>
+			<if test="singleDayStaticOutputBtc != null">single_day_static_output_btc,</if>
+			<if test="serviceFeeUnitPrice != null">service_fee_unit_price,</if>
+			<if test="depositDays != null">deposit_days,</if>
+			<if test="residualValue != null">residual_value,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="projectName != null and projectName != ''">#{projectName},</if>
+			<if test="productImage != null">#{productImage},</if>
+			<if test="packageType != null">#{packageType},</if>
+			<if test="purchaseLimit != null">#{purchaseLimit},</if>
+			<if test="computePowerType != null">#{computePowerType},</if>
+			<if test="computePower != null">#{computePower},</if>
+			<if test="powerConsumption != null">#{powerConsumption},</if>
+			<if test="unitPrice != null">#{unitPrice},</if>
+			<if test="unitPowerCost != null">#{unitPowerCost},</if>
+			<if test="machineUnitPrice != null">#{machineUnitPrice},</if>
+			<if test="minPurchase != null">#{minPurchase},</if>
+			<if test="maxPurchase != null">#{maxPurchase},</if>
+			<if test="minFirstPaymentDays != null">#{minFirstPaymentDays},</if>
+			<if test="planCycle != null">#{planCycle},</if>
+			<if test="batchTagType != null">#{batchTagType},</if>
+			<if test="machineCount != null">#{machineCount},</if>
+			<if test="saleStartTime != null">#{saleStartTime},</if>
+			<if test="saleEndTime != null">#{saleEndTime},</if>
+			<if test="expectedOnlineTime != null">#{expectedOnlineTime},</if>
+			<if test="mineLoad != null">#{mineLoad},</if>
+			<if test="mineLocation != null">#{mineLocation},</if>
+			<if test="historicalOnlineRate != null">#{historicalOnlineRate},</if>
+			<if test="delFlag != null">#{delFlag},</if>
+			<if test="createBy != null">#{createBy},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="updateBy != null">#{updateBy},</if>
+			<if test="updateTime != null">#{updateTime},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="sort != null">#{sort},</if>
+			<if test="tagType != null">#{tagType},</if>
+			<if test="type != null and type != ''">#{type},</if>
+			<if test="reservedFieldOne != null">#{reservedFieldOne},</if>
+			<if test="reservedFieldTwo != null">#{reservedFieldTwo},</if>
+			<if test="reservedFieldThree != null">#{reservedFieldThree},</if>
+			<if test="singleDayStaticOutputBtc != null">#{singleDayStaticOutputBtc},</if>
+			<if test="serviceFeeUnitPrice != null">#{serviceFeeUnitPrice},</if>
+			<if test="depositDays != null">#{depositDays},</if>
+			<if test="residualValue != null">#{residualValue},</if>
+		</trim>
+	</insert>
+
+	<update id="updateMinerProject" parameterType="MinerProject">
+		update miner_project
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="projectName != null and projectName != ''">project_name = #{projectName},</if>
+			<if test="productImage != null">product_image = #{productImage},</if>
+			<if test="packageType != null">package_type = #{packageType},</if>
+			<if test="purchaseLimit != null">purchase_limit = #{purchaseLimit},</if>
+			<if test="computePowerType != null">compute_power_type = #{computePowerType},</if>
+			<if test="computePower != null">compute_power = #{computePower},</if>
+			<if test="powerConsumption != null">power_consumption = #{powerConsumption},</if>
+			<if test="unitPrice != null">unit_price = #{unitPrice},</if>
+			<if test="unitPowerCost != null">unit_power_cost = #{unitPowerCost},</if>
+			<if test="machineUnitPrice != null">machine_unit_price = #{machineUnitPrice},</if>
+			<if test="minPurchase != null">min_purchase = #{minPurchase},</if>
+			<if test="maxPurchase != null">max_purchase = #{maxPurchase},</if>
+			<if test="minFirstPaymentDays != null">min_first_payment_days = #{minFirstPaymentDays},</if>
+			<if test="planCycle != null">plan_cycle = #{planCycle},</if>
+			<if test="batchTagType != null">batch_tag_type = #{batchTagType},</if>
+			<if test="machineCount != null">machine_count = #{machineCount},</if>
+			<if test="saleStartTime != null">sale_start_time = #{saleStartTime},</if>
+			<if test="saleEndTime != null">sale_end_time = #{saleEndTime},</if>
+			<if test="expectedOnlineTime != null">expected_online_time = #{expectedOnlineTime},</if>
+			<if test="mineLoad != null">mine_load = #{mineLoad},</if>
+			<if test="mineLocation != null">mine_location = #{mineLocation},</if>
+			<if test="historicalOnlineRate != null">historical_online_rate = #{historicalOnlineRate},</if>
+			<if test="delFlag != null">del_flag = #{delFlag},</if>
+			<if test="createBy != null">create_by = #{createBy},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateBy != null">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="remark != null">remark = #{remark},</if>
+			<if test="sort != null">sort = #{sort},</if>
+			<if test="tagType != null">tag_type = #{tagType},</if>
+			<if test="type != null and type != ''">type = #{type},</if>
+			<if test="reservedFieldOne != null">reserved_field_one = #{reservedFieldOne},</if>
+			<if test="reservedFieldTwo != null">reserved_field_two = #{reservedFieldTwo},</if>
+			<if test="reservedFieldThree != null">reserved_field_three = #{reservedFieldThree},</if>
+			<if test="singleDayStaticOutputBtc != null">single_day_static_output_btc = #{singleDayStaticOutputBtc},</if>
+			<if test="serviceFeeUnitPrice != null">service_fee_unit_price = #{serviceFeeUnitPrice},</if>
+			<if test="depositDays != null">deposit_days = #{depositDays},</if>
+			<if test="residualValue != null">residual_value = #{residualValue},</if>
+		</trim>
+		where id = #{id}
+	</update>
+
+	<delete id="deleteMinerProjectById" parameterType="Long">
+		delete from miner_project where id = #{id}
+	</delete>
+
+	<delete id="deleteMinerProjectByIds" parameterType="String">
+		delete from miner_project where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>
